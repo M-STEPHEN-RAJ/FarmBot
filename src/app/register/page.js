@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { signIn } from "next-auth/react";
 
-const page = () => {
+const register = () => {
 
   const router = useRouter();
 
@@ -167,4 +167,4 @@ const page = () => {
   )
 }
 
-export default page
+export default register

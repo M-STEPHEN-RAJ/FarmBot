@@ -5,7 +5,7 @@ import axios from 'axios';
 import { signIn } from "next-auth/react";
 import { sign } from 'jsonwebtoken';
 
-const page = () => {
+const login = () => {
 
   const router = useRouter();
 
@@ -165,4 +165,4 @@ const page = () => {
   )
 }
 
-export default page
+export default login
