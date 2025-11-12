@@ -9,7 +9,7 @@ const Footer = () => {
             <img src="/images/landing/footer-bg.png" alt="" className='w-100' />
         </div>
 
-        <div className="relative flex justify-center gap-15 max-w-7xl z-10 py-5">
+        <div className="relative flex justify-center gap-25 max-w-7xl z-10 py-5">
             {/* Left Side */}
             <div className="w-1/2 space-y-8">
 
