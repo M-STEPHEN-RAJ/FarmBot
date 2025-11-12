@@ -1,6 +1,7 @@
 "use client"
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from "react";
+import Loading from './Loading';
 
 const Navbar = () => {
 
@@ -8,6 +9,8 @@ const Navbar = () => {
 
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,17 +29,27 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const handleRegisterRedirect = () => {
+    setLoading(true);
     router.push('/register');
   }
 
   const handleLoginRedirect = () => {
+    setLoading(true);
     router.push("/login");
   };
 
   return (
     <>
-    <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 w-full flex justify-center items-center transition-all duration-500 ${ showNavbar ? "translate-y-0" : "-translate-y-20" }`}>
+    {loading && <Loading />}
+    <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-40 w-full flex justify-center items-center transition-all duration-500 ${ showNavbar ? "translate-y-0" : "-translate-y-20" }`}>
         <div className='flex justify-between items-center max-w-[1200px] w-full px-2 py-0.5 bg-white/50 backdrop-blur-md border border-gray-300 rounded-full'>
 
             <div className="flex items-center cursor-pointer">
@@ -45,10 +58,10 @@ const Navbar = () => {
             </div>
 
             <div className="flex gap-10">
-                <p className='cursor-pointer'>Home</p>
-                <p className='cursor-pointer'>About Us</p>
-                <p className='cursor-pointer'>Faq</p>
-                <p className='cursor-pointer'>Contact Us</p>
+                <p className='cursor-pointer' onClick={() => scrollToSection("home")}>Home</p>
+                <p className='cursor-pointer' onClick={() => scrollToSection("about-us")}>About Us</p>
+                <p className='cursor-pointer' onClick={() => scrollToSection("faq")}>Faq</p>
+                <p className='cursor-pointer' onClick={() => scrollToSection("footer")}>Contact Us</p>
             </div>
 
             <div className="space-x-2">

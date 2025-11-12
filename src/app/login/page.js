@@ -2,8 +2,10 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios';
+import { toast } from "react-hot-toast";
 import { signIn } from "next-auth/react";
 import { sign } from 'jsonwebtoken';
+import Loading from '../components/landing/Loading';
 
 const login = () => {
 
@@ -25,7 +27,7 @@ const login = () => {
 
     try {
       if (!formData.email || !formData.password) {
-        alert("Please fill in all fields!");
+        toast.error("Please fill in all fields!");
         setLoading(false);
         return;
       }
@@ -36,7 +38,7 @@ const login = () => {
       });
 
       if (res.status === 200) {
-        alert("Login successful!");
+        toast.success("Login successful!");
         sessionStorage.setItem("token", res.data.token);
 
         router.push("/");
@@ -44,13 +46,13 @@ const login = () => {
     } 
     catch (error) {
       if (error.response?.status === 401) {
-        alert("Invalid credentials!");
+        toast.error("Invalid credentials!");
       } 
       else if (error.response?.status === 404) {
-        alert("User not found!");
+        toast.error("User not found!");
       } 
       else {
-        alert("Something went wrong!");
+        toast.error("Something went wrong!");
       }
     } finally {
       setLoading(false);
@@ -58,15 +60,18 @@ const login = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    setLoading(true);
     await signIn("google", { callbackUrl: "/" });
   };
 
   const handleRegisterRedirect = () => {
+    setLoading(true);
     router.push('/register');
   }
 
   return (
     <>
+    { loading && <Loading /> }
     <div className="flex w-screen h-screen overflow-hidden">
       {/* Left Side */}
       <div className="bg-white w-1/2 h-full flex flex-col justify-center items-center">

@@ -9,11 +9,21 @@ export default function LandingPage() {
   return (
     <div className="overflow-hidden">
       <Navbar />
-      <Home />
-      <AboutUs />
-      <Testimonials />
-      <Faq />
-      <Footer />
+      <div id="home">
+        <Home />
+      </div>
+      <div id="about-us">
+        <AboutUs />
+      </div>
+      <div id="testimonials">
+        <Testimonials />
+      </div>
+      <div id="faq">
+        <Faq />
+      </div>
+      <div id="footer">
+        <Footer />
+      </div>
     </div>
   );
 }

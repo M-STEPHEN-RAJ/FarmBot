@@ -2,7 +2,9 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { signIn } from "next-auth/react";
+import Loading from '../components/landing/Loading';
 
 const register = () => {
 
@@ -25,21 +27,21 @@ const register = () => {
 
     try {
       if (!formData.name || !formData.email || !formData.password) {
-        alert("Please fill in all fields!");
+        toast.error("Please fill in all fields!");
         setLoading(false);
         return;
       }
 
       const { data } = await axios.post("/api/auth/register", formData);
-      alert(data.message);
+      toast.success(data.message);
       router.push("/login");
     }
     catch (error) {
       if (error.response && error.response.data?.message) {
-        alert(error.response.data.message);
+        toast.error(error.response.data.message);
       }
       else {
-        alert("Something went wrong!");
+        toast.error("Something went wrong!");
       }
     }
     finally{
@@ -48,15 +50,18 @@ const register = () => {
   }
 
   const handleGoogleSignUp = async () => {
+    setLoading(true);
     await signIn("google", { callbackUrl: "/" });
   };
 
   const handleLoginRedirect = () => {
+    setLoading(true);
     router.push('/login');
   }
 
   return (
     <>
+    { loading && <Loading /> }
     <div className="flex w-screen h-screen overflow-hidden">
       {/* Left Side */}
       <div className="bg-white w-1/2 h-full flex flex-col justify-center items-center">
