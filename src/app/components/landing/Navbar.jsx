@@ -1,7 +1,7 @@
 "use client"
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from "react";
-import Loading from './Loading';
+import Loading from '../common/Loading';
 
 const Navbar = () => {
 

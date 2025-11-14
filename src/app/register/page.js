@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { signIn } from "next-auth/react";
-import Loading from '../components/landing/Loading';
+import Loading from '../components/common/Loading';
 
 const register = () => {
 
@@ -51,7 +51,7 @@ const register = () => {
 
   const handleGoogleSignUp = async () => {
     setLoading(true);
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: "/user/chatbot" });
   };
 
   const handleLoginRedirect = () => {

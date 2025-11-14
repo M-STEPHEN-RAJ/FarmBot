@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from "react-hot-toast";
 import { signIn } from "next-auth/react";
 import { sign } from 'jsonwebtoken';
-import Loading from '../components/landing/Loading';
+import Loading from '../components/common/Loading';
 
 const login = () => {
 
@@ -41,7 +41,7 @@ const login = () => {
         toast.success("Login successful!");
         sessionStorage.setItem("token", res.data.token);
 
-        router.push("/");
+        router.push("/user/chatbot");
       }
     } 
     catch (error) {
@@ -61,7 +61,7 @@ const login = () => {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: "/user/chatbot" });
   };
 
   const handleRegisterRedirect = () => {
