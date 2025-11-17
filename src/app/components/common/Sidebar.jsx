@@ -1,9 +1,10 @@
 "use client"
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
 const Sidebar = () => {
 
+  const router = useRouter();
   const pathname = usePathname();
 
   const isActive = (route) => pathname.startsWith(route);
@@ -25,7 +26,10 @@ const Sidebar = () => {
               </div>
             </div>
 
-            <div className={`p-2 ${isActive("/user/store") ? 'bg-gray-300 hover:bg-gray-400' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
+            <div 
+              onClick={() => router.push('/user/store')}
+              className={`p-2 ${isActive("/user/store") ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
+            >
               <img src="/images/sidebar/farmstore.png" alt="" className='w-6' />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
                 Farm Store
@@ -46,7 +50,10 @@ const Sidebar = () => {
               </div>
             </div>
 
-            <div className={`p-2 ${isActive("/user/chatbot") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
+            <div 
+              onClick={() => router.push('/user/chatbot')}
+              className={`p-2 ${isActive("/user/chatbot") ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
+            >
               <img src="/images/sidebar/chatbot.png" alt="" className='w-6' />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
                 Farm AI
@@ -64,7 +71,10 @@ const Sidebar = () => {
             </div>
           </div>
 
-          <div className={`p-2 ${isActive("/user/settings") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
+          <div 
+            onClick={() => router.push('/user/settings')} 
+            className={`p-2 ${isActive("/user/settings") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
+          >
             <img src="/images/sidebar/settings.png" alt="" className='w-6' />
             <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
               Settings

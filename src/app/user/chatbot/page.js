@@ -81,7 +81,7 @@ const ChatBot = () => {
           <div className={`w-full flex ${text.length > 59 ? 
             "flex-col items-end gap-3" : 
             "flex-row justify-between items-center gap-3"
-          } px-3 py-2 border border-gray-300 rounded-4xl`}>
+          } px-3 py-1.5 border border-gray-300 rounded-4xl`}>
 
             <textarea
               ref={textareaRef}
