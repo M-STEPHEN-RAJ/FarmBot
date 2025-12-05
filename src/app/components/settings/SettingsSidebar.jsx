@@ -72,18 +72,34 @@ const SettingsSidebar = () => {
         </div>
       </div>
 
-      {/* Hugging Face API Usage */}
-      <div className="px-1.5">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Hugging Face API Usage</h3>
-        <div className="w-full bg-gray-300 h-2 rounded-full mb-1.5">
-          <div
-            className={`${usageColor} h-2 rounded-full transition-all duration-300`}
-            style={{ width: `${usagePercent}%` }}
-          ></div>
+      <div className="space-y-5">
+        {/* Gemini API Usage */}
+        <div className="px-2">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Gemini API Usage</h3>
+          <div className="w-full bg-gray-300 h-2 rounded-full mb-1.5">
+            <div
+              className={`${usageColor} h-2 rounded-full transition-all duration-300`}
+              style={{ width: `${usagePercent}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-700">
+            {usage.totalRequests} of {usage.maxRequests} requests used ({usagePercent}%)
+          </p>
         </div>
-        <p className="text-xs text-gray-700">
-          {usage.totalRequests} of {usage.maxRequests} requests used ({usagePercent}%)
-        </p>
+
+        {/* Hugging Face API Usage */}
+        <div className="px-2">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Hugging Face API Usage</h3>
+          <div className="w-full bg-gray-300 h-2 rounded-full mb-1.5">
+            <div
+              className={`${usageColor} h-2 rounded-full transition-all duration-300`}
+              style={{ width: `${usagePercent}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-700">
+            {usage.totalRequests} of {usage.maxRequests} requests used ({usagePercent}%)
+          </p>
+        </div>
       </div>
 
     </div>

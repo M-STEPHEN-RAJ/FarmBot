@@ -81,7 +81,7 @@ const ChatBot = () => {
           <div className={`w-full flex ${text.length > 59 ? 
             "flex-col items-end gap-3" : 
             "flex-row justify-between items-center gap-3"
-          } px-3 py-1.5 border border-gray-300 rounded-4xl`}>
+          } px-2 py-1 border border-gray-300 rounded-4xl`}>
 
             <textarea
               ref={textareaRef}
@@ -103,7 +103,7 @@ const ChatBot = () => {
               </div>
 
               <div
-                className={`w-10 p-1.5 rounded-full cursor-pointer ${listening ? "bg-red-500" : "bg-[#166831]"}`}
+                className={`w-10 p-2 rounded-full cursor-pointer ${listening ? "bg-red-500" : "bg-[#166831]"}`}
                 onClick={text.length > 0 ? () => { console.log("Send clicked:", text); setText(""); } : startListening}
               >
                 <img
