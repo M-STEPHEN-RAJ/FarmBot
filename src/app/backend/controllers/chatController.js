@@ -87,3 +87,16 @@ export const getChatById = async (chatId) => {
 
   return chat;
 };
+
+// Delete a chat by ID
+export const deleteChat = async (chatId, userId) => {
+  await connectDB();
+
+  const chat = await Chat.findOne({ _id: chatId, userId });
+  if (!chat) throw new Error("Chat not found or not authorized!");
+
+  await Chat.deleteOne({ _id: chatId });
+
+  return { success: true, message: "Chat deleted successfully!" };
+};
+
