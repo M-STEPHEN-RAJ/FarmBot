@@ -1,18 +1,19 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react'
+import { useRouter } from "next/navigation";
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API } from '../../../app/utils/api.js'
 
-const ChatSidebar = () => {
+const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
 
   const userId = "6914f28274882b40bddbe70f";
 
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
-  const [selectedChatId, setSelectedChatId] = useState(null);
 
+  const router = useRouter();
   const dropdownRef = useRef(null);
 
   // Fetch all converstions
@@ -37,6 +38,7 @@ const ChatSidebar = () => {
         params: { chatId, userId } 
       });
       toast.success("Chat deleted!");
+      router.push('/user/chatbot');
       fetchConversations();
     } catch (err) {
       console.error(err);
@@ -45,25 +47,34 @@ const ChatSidebar = () => {
   };
 
   // Create a new chat
-  const handleNewChat = async () => {
-    try {
-      const { data } = await axios.post(`${API}/chatbot/new`, {
-        userId: userId,
-        title: "New Chat",
-        language: "en-US"
-      });
+  // const handleNewChat = async () => {
+  //   try {
+  //     const { data } = await axios.post(`${API}/chatbot/new`, {
+  //       userId: userId,
+  //       title: "New Chat",
+  //       language: "en-US"
+  //     });
 
-      toast.success("New chat created!");
-      fetchConversations();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to create new chat!");
-    }
+  //     if (data && data.chatId) {
+  //       toast.success("New chat created!");
+  //       router.push(`/user/chatbot/${data.chatId}`);
+  //       fetchConversations();
+  //     } else {
+  //       toast.error("Failed to get new chat ID!");
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to create new chat!");
+  //   }
+  // };
+
+  const handleNewChat = async () => {
+    router.push('/user/chatbot');
   };
 
   useEffect(() => {
     fetchConversations();
-  }, []);
+  }, [refreshFlag]);
 
   // Close dropdown
   useEffect(() => {
@@ -119,10 +130,12 @@ const ChatSidebar = () => {
           {conversations.map((chat) => (
             <div 
               key={chat._id} 
-              onClick={() => setSelectedChatId(chat._id)}
+              onClick={() => {
+                router.push(`/user/chatbot/${chat._id}`);
+              }}
               className={`relative px-2 py-2 flex justify-between items-center gap-3 ${selectedChatId === chat._id ? 'bg-[#eeeef1] hover:bg-gray-200' : 'hover:bg-gray-100' } rounded-md cursor-pointer group`}
             >
-              <p className='text-sm'>{chat.title}</p>
+              <p className='text-sm truncate'>{chat.title}</p>
               <img 
                 onClick={(e) => {
                   e.stopPropagation();

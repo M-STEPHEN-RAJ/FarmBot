@@ -31,11 +31,16 @@ export const addMessage = async ({ chatId, message, userId, lang }) => {
 You are FarmBot AI.
 Reply only to farmer-related questions.
 Reply in ${lang === "ta-IN" ? "Tamil" : "English"}.
+Make your answer simple and easy to understand for farmers.
+Use bullet points (<ol><li>…</li></ol>) for each point instead of "-".
+Optionally, you can use numbers (1,2,3) or Roman numerals (i, ii, iii) for numbering.
+Highlight important words with <b>bold</b> tags instead of using **.
+Separate sections with <br> where needed.
 User message: "${message}"
-${chat.title === "New Chat" ? "Also, generate a short 3-5 word title for this conversation." : ""}
+${chat.title === "New Chat" ? 'Also, generate a short 3-5 word title for this conversation.' : ""}
 Provide your response as JSON:
 {
-  "reply": "<Your bot reply>"${chat.title === "New Chat" ? ', "title": "<Conversation title>"' : ""}
+  "reply": "<Your bot reply with <ul><li>…</li></ul> and <b>bold</b> tags>"${chat.title === "New Chat" ? ', "title": "<Conversation title>"' : ""}
 }
 `;
 

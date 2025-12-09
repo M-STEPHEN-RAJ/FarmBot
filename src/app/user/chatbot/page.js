@@ -1,16 +1,75 @@
 "use client"
 import ChatSidebar from '@/app/components/chatbot/ChatSidebar';
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from "next/navigation";
+import axios from "axios";
 import { toast } from 'react-hot-toast';
+import { API } from "@/app/utils/api";
 
-const ChatBot = () => {
+const ChatBotHome = () => {
+
+  const router = useRouter();
+
+  const userId = "6914f28274882b40bddbe70f";
+
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const [lang, setLang] = useState("en-US");
+  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [messages, setMessages] = useState([]);
 
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const prevLangRef = useRef(lang);
+
+  // Create Chat and Send Message
+  const handleSend = async () => {
+    if (!text.trim()) return;
+
+    try {
+      let chatId = selectedChatId;
+
+      if (!chatId) {
+        const { data } = await axios.post(`${API}/chatbot/new`, {
+          userId,
+          title: "New Chat",
+          language: lang
+        });
+        chatId = data.chatId;
+        setSelectedChatId(chatId);
+      }
+
+      const userMessage = text.trim();
+      setText("");
+
+      await axios.post(`${API}/chatbot/send`, {
+        chatId,
+        userId,
+        message: userMessage,
+        lang,
+      });
+
+      router.push(`/user/chatbot/${chatId}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send message!");
+    }
+  };
+
+  const fetchChatMessages = async (chatId) => {
+    try {
+      const { data } = await axios.get(`${API}/chatbot/${chatId}`);
+      setMessages(data.messages || []);
+    } catch (err) {
+      console.error("Failed to load messages", err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedChatId) {
+      fetchChatMessages(selectedChatId);
+    }
+  }, [selectedChatId]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -66,13 +125,17 @@ const ChatBot = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       console.log("Send clicked:", text);
-      setText("");
+      handleSend();
     }
   };
 
   return (
     <div className="w-full flex">
-      <ChatSidebar />
+
+      <ChatSidebar 
+        selectedChatId={selectedChatId}
+        onSelectChat={setSelectedChatId}
+      />
 
       <div className="flex-1 flex justify-center items-center">
         <div className="flex flex-col justify-center items-center space-y-10 w-full max-w-[800px]">
@@ -104,7 +167,7 @@ const ChatBot = () => {
 
               <div
                 className={`w-10 p-2 rounded-full cursor-pointer ${listening ? "bg-red-500" : "bg-[#166831]"}`}
-                onClick={text.length > 0 ? () => { console.log("Send clicked:", text); setText(""); } : startListening}
+                onClick={ text.length > 0 ? handleSend : startListening }
               >
                 <img
                   src={`/images/chatbot/${text.length > 0 ? "send" : "microphone"}.png`}
@@ -142,4 +205,4 @@ const ChatBot = () => {
   );
 };
 
-export default ChatBot;
+export default ChatBotHome;
