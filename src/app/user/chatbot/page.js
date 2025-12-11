@@ -1,16 +1,15 @@
-"use client"
-import ChatSidebar from '@/app/components/chatbot/ChatSidebar';
-import React, { useState, useRef, useEffect } from 'react';
+"use client";
+import ChatSidebar from "@/app/components/chatbot/ChatSidebar";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
 
 const ChatBotHome = () => {
-
   const router = useRouter();
 
-  const userId = "6914f28274882b40bddbe70f";
+  const [userId, setUserId] = useState(null);
 
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
@@ -22,6 +21,21 @@ const ChatBotHome = () => {
   const recognitionRef = useRef(null);
   const prevLangRef = useRef(lang);
 
+  // Get Current User Login
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await axios.get(`${API}/me`, { withCredentials: true });
+      if (res.data?.user?._id) {
+        setUserId(res.data.user._id);
+      } else {
+        toast.error("Failed to get user info");
+      }
+    } catch (err) {
+      console.error("Failed to fetch user!", err);
+      toast.error("Failed to fetch user info!");
+    }
+  };
+
   // Create Chat and Send Message
   const handleSend = async () => {
     if (!text.trim()) return;
@@ -30,10 +44,11 @@ const ChatBotHome = () => {
       let chatId = selectedChatId;
 
       if (!chatId) {
-        const { data } = await axios.post(`${API}/chatbot/new`, {
-          userId,
+        const { data } = await axios.post(`${API}/chatbot/new`, {          
           title: "New Chat",
-          language: lang
+          language: lang,
+        }, {
+          withCredentials: true
         });
         chatId = data.chatId;
         setSelectedChatId(chatId);
@@ -42,12 +57,17 @@ const ChatBotHome = () => {
       const userMessage = text.trim();
       setText("");
 
-      await axios.post(`${API}/chatbot/send`, {
-        chatId,
-        userId,
-        message: userMessage,
-        lang,
-      });
+      await axios.post(
+        `${API}/chatbot/send`,
+        {
+          chatId,          
+          message: userMessage,
+          lang,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
       router.push(`/user/chatbot/${chatId}`);
     } catch (err) {
@@ -58,7 +78,9 @@ const ChatBotHome = () => {
 
   const fetchChatMessages = async (chatId) => {
     try {
-      const { data } = await axios.get(`${API}/chatbot/${chatId}`);
+      const { data } = await axios.get(`${API}/chatbot/${chatId}`, {
+        withCredentials: true
+      });
       setMessages(data.messages || []);
     } catch (err) {
       console.error("Failed to load messages", err);
@@ -66,10 +88,14 @@ const ChatBotHome = () => {
   };
 
   useEffect(() => {
-    if (selectedChatId) {
+    fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (userId && selectedChatId) {
       fetchChatMessages(selectedChatId);
     }
-  }, [selectedChatId]);
+  }, [userId, selectedChatId]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -87,8 +113,8 @@ const ChatBotHome = () => {
 
         recognition.onresult = (event) => {
           const transcript = Array.from(event.results)
-            .map(result => result[0].transcript)
-            .join('');
+            .map((result) => result[0].transcript)
+            .join("");
           setText(transcript);
         };
 
@@ -103,7 +129,7 @@ const ChatBotHome = () => {
     recognitionRef.current.lang = lang;
 
     if (prevLangRef.current !== lang) {
-      toast.success(`Switched to ${lang === 'ta-IN' ? 'Tamil' : 'English'}`);
+      toast.success(`Switched to ${lang === "ta-IN" ? "Tamil" : "English"}`);
       prevLangRef.current = lang;
     }
   }, [lang]);
@@ -131,21 +157,24 @@ const ChatBotHome = () => {
 
   return (
     <div className="w-full flex">
-
-      <ChatSidebar 
+      <ChatSidebar
         selectedChatId={selectedChatId}
         onSelectChat={setSelectedChatId}
       />
 
       <div className="flex-1 flex justify-center items-center">
         <div className="flex flex-col justify-center items-center space-y-10 w-full max-w-[800px]">
-          <h2 className='text-4xl font-medium text-[#166831]'>Hello, Stephen</h2>
+          <h2 className="text-4xl font-medium text-[#166831]">
+            Hello, Stephen
+          </h2>
 
-          <div className={`w-full flex ${text.length > 59 ? 
-            "flex-col items-end gap-3" : 
-            "flex-row justify-between items-center gap-3"
-          } px-2 py-1 border border-gray-300 rounded-4xl`}>
-
+          <div
+            className={`w-full flex ${
+              text.length > 59
+                ? "flex-col items-end gap-3"
+                : "flex-row justify-between items-center gap-3"
+            } px-2 py-1 border border-gray-300 rounded-4xl`}
+          >
             <textarea
               ref={textareaRef}
               rows={1}
@@ -157,20 +186,23 @@ const ChatBotHome = () => {
             />
 
             <div className="flex items-center gap-3">
-
-              <div 
-                onClick={() => setLang(lang === "en-US" ? "ta-IN" : "en-US")} 
+              <div
+                onClick={() => setLang(lang === "en-US" ? "ta-IN" : "en-US")}
                 className="w-10 flex justify-center items-center p-2.5 hover:bg-gray-100 rounded-full cursor-pointer"
               >
-                <p className='font-semibold'>{lang === "en-US" ? "en" : "த"}</p>
+                <p className="font-semibold">{lang === "en-US" ? "en" : "த"}</p>
               </div>
 
               <div
-                className={`w-10 p-2 rounded-full cursor-pointer ${listening ? "bg-red-500" : "bg-[#166831]"}`}
-                onClick={ text.length > 0 ? handleSend : startListening }
+                className={`w-10 p-2 rounded-full cursor-pointer ${
+                  listening ? "bg-red-500" : "bg-[#166831]"
+                }`}
+                onClick={text.length > 0 ? handleSend : startListening}
               >
                 <img
-                  src={`/images/chatbot/${text.length > 0 ? "send" : "microphone"}.png`}
+                  src={`/images/chatbot/${
+                    text.length > 0 ? "send" : "microphone"
+                  }.png`}
                   alt=""
                   className="w-8"
                 />
@@ -184,12 +216,12 @@ const ChatBotHome = () => {
               "How much fertilizer should I use?",
               "Detect plant disease",
               "Expected rainfall for this week",
-              "Tips for healthy soil"
+              "Tips for healthy soil",
             ].map((prompt, idx) => (
               <button
                 key={idx}
                 onClick={() => {
-                  setText(prompt); 
+                  setText(prompt);
                   textareaRef.current.focus();
                 }}
                 className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm hover:bg-green-200 transition cursor-pointer"
@@ -198,7 +230,6 @@ const ChatBotHome = () => {
               </button>
             ))}
           </div>
-          
         </div>
       </div>
     </div>

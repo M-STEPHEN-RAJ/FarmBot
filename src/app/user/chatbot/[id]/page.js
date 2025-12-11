@@ -6,12 +6,13 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
 
-
 const ChatBot = () => {
   const params = useParams();
 
-  const userId = "6914f28274882b40bddbe70f";
   const chatId = params?.id;
+
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -24,24 +25,36 @@ const ChatBot = () => {
   const recognitionRef = useRef(null);
   const prevLangRef = useRef(lang);
 
-  const refreshSidebar = () => setRefreshFlag(prev => !prev);
+  const refreshSidebar = () => setRefreshFlag((prev) => !prev);
 
   // Fetch messages
   const fetchMessages = async () => {
+    setLoading(true);
+
     try {
-      const res = await axios.get(
-        `${API}/chatbot/${chatId}`
-      );
-      if (res.data?.chat?.messages) {
+      const res = await axios.get(`${API}/chatbot/${chatId}`);
+      if (res.data?.chat) {
+        const ownerId = res.data.chat.userId;
+        setCurrentUserId(ownerId);
+
         const formattedMessages = res.data.chat.messages.map((msg) => ({
-          sender: msg.userId._id === userId ? "user" : "bot",
+          sender: msg.userId._id === ownerId ? "user" : "bot",
           text: msg.content || "",
         }));
         setMessages(formattedMessages);
       }
     } catch (err) {
       console.error("Failed to fetch messages:", err);
+
+      if (err.response?.status === 404 || err.response?.status === 500) {
+        toast.error("This chat no longer exists!");
+        window.location.href = "/user/chatbot";
+        return;
+      }
+
       toast.error("Failed to load messages!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,7 +66,6 @@ const ChatBot = () => {
 
   // Send Message
   const sendMessage = async () => {
-
     if (!chatId) {
       toast.error("No chat selected!");
       return;
@@ -68,7 +80,6 @@ const ChatBot = () => {
     try {
       await axios.post(`${API}/chatbot/send`, {
         chatId,
-        userId,
         message: text.trim(),
         lang,
       });
@@ -127,12 +138,12 @@ const ChatBot = () => {
 
   const startListening = () => {
     if (recognitionRef.current && !listening) {
-        try {
+      try {
         recognitionRef.current.start();
-        } catch (err) {
+      } catch (err) {
         console.error("Speech recognition failed:", err);
         toast.error("Cannot start voice input.");
-        }
+      }
     }
   };
 
@@ -145,15 +156,47 @@ const ChatBot = () => {
 
   return (
     <div className="w-full flex">
-      <ChatSidebar selectedChatId={chatId}  />
+      <ChatSidebar selectedChatId={chatId} />
 
       <div className="flex-1 flex justify-center items-center">
-        {messages.length === 0 ? (
-          <div className="flex flex-col justify-center items-center space-y-10 w-full max-w-[800px]">
-            <h2 className="text-4xl font-medium text-[#166831]">
-              Hello, Stephen
-            </h2>
+        <div className="flex-1 flex flex-col h-screen max-w-[800px] mx-auto w-full">
+          <div className="flex-1 overflow-y-auto py-4 space-y-5">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`w-fit px-5 py-2 rounded-xl wrap-break-word
+            ${
+              msg.sender === "user"
+                ? "bg-[#166831] text-white ml-auto max-w-[70%]"
+                : "bg-white text-gray-800"
+            }`}
+                dangerouslySetInnerHTML={{ __html: msg.text }}
+              />
+            ))}
 
+            {loading && (
+              <div className="flex flex-col justify-between w-full h-[90%]">
+                <div className="space-y-5 h-full">
+                  {Array.from({ length: 3 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="flex flex-col space-y-5 px-4 max-w-[800px] w-full mx-auto"
+                    >
+                      <div className="ml-auto w-[50%] h-7 bg-green-300/50 rounded-xl animate-pulse"></div>
+                      <div className="space-y-2">
+                        <div className="w-[80%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                        <div className="w-[80%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                        <div className="w-[60%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="mb-2 space-y-2">
             <div
               className={`w-full flex px-2 py-1 ${
                 text.length > 70
@@ -172,11 +215,10 @@ const ChatBot = () => {
                     sendMessage();
                   }
                 }}
-                className="w-full outline-none resize-none overflow-y-auto px-3"
+                className="w-full outline-none resize-none overflow-y-auto px-3 py-2"
                 placeholder="Ask Farm AI"
               />
-
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <div
                   onClick={() => setLang(lang === "en-US" ? "ta-IN" : "en-US")}
                   className="w-10 flex justify-center items-center p-2.5 hover:bg-gray-100 rounded-full cursor-pointer"
@@ -185,16 +227,11 @@ const ChatBot = () => {
                     {lang === "en-US" ? "en" : "த"}
                   </p>
                 </div>
-
                 <div
                   className={`w-10 p-2 rounded-full cursor-pointer ${
                     listening ? "bg-red-500" : "bg-[#166831]"
                   }`}
-                  onClick={
-                    text.length > 0
-                      ? sendMessage
-                      : startListening
-                  }
+                  onClick={text.length > 0 ? sendMessage : startListening}
                 >
                   <img
                     src={`/images/chatbot/${
@@ -206,101 +243,11 @@ const ChatBot = () => {
                 </div>
               </div>
             </div>
-
-            <div className="w-full max-w-[600px] flex justify-center items-center flex-wrap gap-3">
-              {[
-                "What is the best crop for this season?",
-                "How much fertilizer should I use?",
-                "Detect plant disease",
-                "Expected rainfall for this week",
-                "Tips for healthy soil",
-              ].map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setText(prompt);
-                    textareaRef.current.focus();
-                  }}
-                  className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm hover:bg-green-200 transition cursor-pointer"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
+            <p className="text-xs text-center text-gray-500">
+              FarmBot AI can make mistakes. Check important info.
+            </p>
           </div>
-        ) : (
-          <div className="flex-1 flex flex-col h-screen max-w-[800px] mx-auto w-full">
-            <div className="flex-1 overflow-y-auto py-4 space-y-5">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`w-fit px-5 py-2 rounded-xl wrap-break-word
-            ${
-              msg.sender === "user"
-                ? "bg-[#166831] text-white ml-auto max-w-[70%]"
-                : "bg-white text-gray-800"
-            }`}
-            dangerouslySetInnerHTML={{ __html: msg.text }}
-                />                
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div className="mb-2 space-y-2">
-              <div
-                className={`w-full flex px-2 py-1 ${
-                  text.length > 70
-                    ? "flex-col items-end gap-3 py-2"
-                    : "flex-row justify-between items-center gap-3"
-                } border border-gray-300 rounded-4xl`}
-              >
-                <textarea
-                  ref={textareaRef}
-                  rows={1}
-                  value={text}
-                  onChange={handleInput}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  className="w-full outline-none resize-none overflow-y-auto px-3 py-2"
-                  placeholder="Ask Farm AI"
-                />
-                <div className="flex items-center gap-2">
-                  <div
-                    onClick={() =>
-                      setLang(lang === "en-US" ? "ta-IN" : "en-US")
-                    }
-                    className="w-10 flex justify-center items-center p-2.5 hover:bg-gray-100 rounded-full cursor-pointer"
-                  >
-                    <p className="font-semibold">
-                      {lang === "en-US" ? "en" : "த"}
-                    </p>
-                  </div>
-                  <div
-                    className={`w-10 p-2 rounded-full cursor-pointer ${
-                      listening ? "bg-red-500" : "bg-[#166831]"
-                    }`}
-                    onClick={text.length > 0 ? sendMessage : startListening}
-                  >
-                    <img
-                      src={`/images/chatbot/${
-                        text.length > 0 ? "send" : "microphone"
-                      }.png`}
-                      alt=""
-                      className="w-8"
-                    />
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-center text-gray-500">
-                FarmBot AI can make mistakes. Check important info.
-              </p>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

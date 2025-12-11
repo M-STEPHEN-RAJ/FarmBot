@@ -1,37 +1,45 @@
 import { getChats, deleteChat } from "../../../backend/controllers/chatController.js";
 
+const createRes = () => ({
+  json: (data) => new Response(JSON.stringify(data), { status: 200 }),
+  status: (code) => ({
+    json: (data) => new Response(JSON.stringify(data), { status: code }),
+  }),
+});
+
 export async function GET(req) {
   try {
-    const url = new URL(req.url);
-    const userId = url.searchParams.get("userId");
+    const cookieHeader = req.headers.get("cookie") || "";
+    const token = cookieHeader
+      .split(";")
+      .find((c) => c.trim().startsWith("token="))
+      ?.split("=")[1];
 
-    if (!userId) {
-      return new Response(JSON.stringify({ error: "userId is required" }), { status: 400 });
-    }
-
-    const chats = await getChats(userId);
-
-    return new Response(JSON.stringify({ chats }), { status: 200 });
+    const res = createRes();
+    return getChats(token, res);
   } catch (err) {
     console.error(err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
 
-// Handle delete request
 export async function DELETE(req) {
   try {
     const url = new URL(req.url);
     const chatId = url.searchParams.get("chatId");
-    const userId = url.searchParams.get("userId");
 
-    if (!chatId || !userId) {
-      return new Response(JSON.stringify({ error: "chatId and userId are required" }), { status: 400 });
+    if (!chatId) {
+      return new Response(JSON.stringify({ error: "chatId is required" }), { status: 400 });
     }
 
-    const result = await deleteChat(chatId, userId);
+    const cookieHeader = req.headers.get("cookie") || "";
+    const token = cookieHeader
+      .split(";")
+      .find((c) => c.trim().startsWith("token="))
+      ?.split("=")[1];
 
-    return new Response(JSON.stringify(result), { status: 200 });
+    const res = createRes();
+    return deleteChat(token, chatId, res);
   } catch (err) {
     console.error(err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });

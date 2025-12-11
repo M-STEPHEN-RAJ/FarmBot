@@ -1,3 +1,4 @@
+import { serialize } from "cookie";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js"
@@ -49,7 +50,7 @@ export const loginUser = async (req) => {
     if (!user) {
       return new Response(
         JSON.stringify({ message: "User not found!" }),
-        { status: 404 }
+        { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -57,19 +58,35 @@ export const loginUser = async (req) => {
     if (!isMatch) {
       return new Response(
         JSON.stringify({ message: "Invalid credentials!" }),
-        { status: 401 }
+        { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
+    // Create JWT token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
+    // Set cookie
+    const cookie = serialize("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60,
+      path: "/",
+    });
+
     return new Response(
-      JSON.stringify({ message: "Login successful!", token, user }),
-      { status: 200 }
+      JSON.stringify({ message: "Login successful!", user, token }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie": cookie,
+        },
+      }
     );
   }
   catch (error) {

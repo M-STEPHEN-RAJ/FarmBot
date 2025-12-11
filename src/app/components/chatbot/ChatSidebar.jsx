@@ -7,8 +7,6 @@ import { API } from '../../../app/utils/api.js'
 
 const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
 
-  const userId = "6914f28274882b40bddbe70f";
-
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -18,9 +16,12 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
 
   // Fetch all converstions
   const fetchConversations = async () => {
+    
     setLoading(true);
     try {
-      const res = await fetch(`${API}/chatbot/list?userId=${userId}`);
+      const res = await fetch(`${API}/chatbot/list`, {
+        credentials: "include"
+      });
       const data = await res.json();
       setConversations(data.chats || []);
     } catch (err) {
@@ -35,7 +36,7 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
   const handleDeleteChat = async (chatId) => {
     try {
       await axios.delete(`${API}/chatbot/list`, { 
-        params: { chatId, userId } 
+        params: { chatId } 
       });
       toast.success("Chat deleted!");
       router.push('/user/chatbot');
@@ -45,28 +46,6 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
       toast.error("Failed to delete chat!");
     }
   };
-
-  // Create a new chat
-  // const handleNewChat = async () => {
-  //   try {
-  //     const { data } = await axios.post(`${API}/chatbot/new`, {
-  //       userId: userId,
-  //       title: "New Chat",
-  //       language: "en-US"
-  //     });
-
-  //     if (data && data.chatId) {
-  //       toast.success("New chat created!");
-  //       router.push(`/user/chatbot/${data.chatId}`);
-  //       fetchConversations();
-  //     } else {
-  //       toast.error("Failed to get new chat ID!");
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Failed to create new chat!");
-  //   }
-  // };
 
   const handleNewChat = async () => {
     router.push('/user/chatbot');

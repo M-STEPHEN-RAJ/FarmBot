@@ -3,105 +3,156 @@ import Chat from "../models/Chat.js";
 import { connectDB } from "../config/db";
 import { model } from "../config/gemini";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 // Ensure the User model is registered
 mongoose.model('User', User.schema);
 
 // Create New Chat
-export const createChat = async (userId) => {
-  await connectDB();
+export const createChat = async (token, res) => {
+  try {
+    await connectDB();
 
-  const chat = await Chat.create({
-    userId,
-    title: "New Chat",
-    messages: []
-  });
+    if (!token) throw new Error("Unauthorized: No token");
 
-  return chat._id;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const chat = await Chat.create({
+      userId,
+      title: "New Chat",
+      messages: [],
+    });
+
+    return res.json({ chatId: chat._id });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to create chat!" });
+  }
 };
 
-// Add message and bot reply (combined prompt)
-export const addMessage = async ({ chatId, message, userId, lang }) => {
-  await connectDB();
-
-  const chat = await Chat.findById(chatId);
-  let newTitle = chat.title;
-
-  const prompt = `
-You are FarmBot AI.
-Reply only to farmer-related questions.
-Reply in ${lang === "ta-IN" ? "Tamil" : "English"}.
-Make your answer simple and easy to understand for farmers.
-Use bullet points (<ol><li>…</li></ol>) for each point instead of "-".
-Optionally, you can use numbers (1,2,3) or Roman numerals (i, ii, iii) for numbering.
-Highlight important words with <b>bold</b> tags instead of using **.
-Separate sections with <br> where needed.
-User message: "${message}"
-${chat.title === "New Chat" ? 'Also, generate a short 3-5 word title for this conversation.' : ""}
-Provide your response as JSON:
-{
-  "reply": "<Your bot reply with <ul><li>…</li></ul> and <b>bold</b> tags>"${chat.title === "New Chat" ? ', "title": "<Conversation title>"' : ""}
-}
-`;
-
-  const result = await model.generateContent(prompt);
-  let responseText = result.response.text();
-
-  responseText = responseText.replace(/```json\s*([\s\S]*?)\s*```/i, '$1').trim();
-
-  let parsed;
+// Add message and bot reply
+export const addMessage = async (token, { chatId, message, lang }, res) => {
   try {
-    parsed = JSON.parse(responseText);
-  } catch (err) {
-    console.error("Failed to parse Gemini response as JSON:", err);
-    parsed = { reply: responseText };
+    await connectDB();
+
+    if (!token) throw new Error("Unauthorized: No token");
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) return res.status(404).json({ error: "Chat not found!" });
+    let newTitle = chat.title;
+
+    const prompt = `
+  You are FarmBot AI.
+  Reply only to farmer-related questions.
+  Reply in ${lang === "ta-IN" ? "Tamil" : "English"}.
+  Make your answer simple and easy to understand for farmers.
+  Use bullet points (<ol><li>…</li></ol>) for each point instead of "-".
+  Optionally, you can use numbers (1,2,3) or Roman numerals (i, ii, iii) for numbering.
+  Highlight important words with <b>bold</b> tags instead of using **.
+  Separate sections with <br> where needed.
+  User message: "${message}"
+  ${chat.title === "New Chat" ? 'Also, generate a short 3-5 word title for this conversation.' : ""}
+  Provide your response as JSON:
+  {
+    "reply": "<Your bot reply with <ul><li>…</li></ul> and <b>bold</b> tags>"${chat.title === "New Chat" ? ', "title": "<Conversation title>"' : ""}
   }
+  `;
 
-  const botReply = parsed.reply || message;
-  if (parsed.title) newTitle = parsed.title.slice(0, 50);
+    const result = await model.generateContent(prompt);
+    let responseText = result.response.text();
 
-  await Chat.findByIdAndUpdate(chatId, {
-    $push: {
-      messages: [
-        { userId, content: message },
-        { userId: new mongoose.Types.ObjectId(process.env.BOT_USER_ID), content: botReply }
-      ]
-    },
-    language: lang,
-    title: newTitle
-  });
+    responseText = responseText.replace(/```json\s*([\s\S]*?)\s*```/i, '$1').trim();
 
-  return { title: newTitle, reply: botReply };
+    let parsed;
+    try {
+      parsed = JSON.parse(responseText);
+    } catch (err) {
+      console.error("Failed to parse Gemini response as JSON:", err);
+      parsed = { reply: responseText };
+    }
+
+    const botReply = parsed.reply || message;
+    if (parsed.title) newTitle = parsed.title.slice(0, 50);
+
+    await Chat.findByIdAndUpdate(chatId, {
+      $push: {
+        messages: [
+          { userId, content: message },
+          { userId: new mongoose.Types.ObjectId(process.env.BOT_USER_ID), content: botReply }
+        ]
+      },
+      language: lang,
+      title: newTitle
+    });
+
+    return res.json({ title: newTitle, reply: botReply });
+  }
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to process message!" });
+  }
 };
 
 // Conversation Sidebar
-export const getChats = async (userId) => {
-  await connectDB();
+export const getChats = async (token, res) => {
+  try {
+    await connectDB();
 
-  const chats = await Chat.find({ userId }).sort({ createdAt: -1 });
-  return chats;
-};
+    if (!token) throw new Error("Unauthorized: No token");
 
-// Get chat by ID
-export const getChatById = async (chatId) => {
-  await connectDB();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
 
-  const chat = await Chat.findById(chatId).populate("messages.userId", "name");
-
-  if (!chat) throw new Error("Chat not found");
-
-  return chat;
+    const chats = await Chat.find({ userId }).sort({ createdAt: -1 });
+    return res.json({ chats });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to load chats!" });
+  }
 };
 
 // Delete a chat by ID
-export const deleteChat = async (chatId, userId) => {
-  await connectDB();
+export const deleteChat = async (token, chatId, res) => {
+  try {
+    await connectDB();
 
-  const chat = await Chat.findOne({ _id: chatId, userId });
-  if (!chat) throw new Error("Chat not found or not authorized!");
+    if (!token) throw new Error("Unauthorized: No token");
 
-  await Chat.deleteOne({ _id: chatId });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
 
-  return { success: true, message: "Chat deleted successfully!" };
+    const chat = await Chat.findOne({ _id: chatId, userId });
+    if (!chat) throw new Error("Chat not found or not authorized!");
+
+    await Chat.deleteOne({ _id: chatId });
+
+    return res.json({ success: true, message: "Chat deleted successfully!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to delete chat!" });
+  }
+};
+
+// Get chat by ID
+export const getChatById = async (token, chatId) => {
+  try {
+    await connectDB();
+
+    if (!token) throw new Error("Unauthorized: No token");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const chat = await Chat.findOne({ _id: chatId, userId }).populate("messages.userId", "name");
+    if (!chat) throw new Error("Chat not found!");
+
+    return chat;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
