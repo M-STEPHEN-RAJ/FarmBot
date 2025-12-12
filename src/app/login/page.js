@@ -37,6 +37,7 @@ const login = () => {
       });
 
       if (res.status === 200) {
+        localStorage.setItem("session-change", Date.now());
         toast.success("Login successful!");
         router.push("/user/chatbot");
       }
@@ -56,6 +57,7 @@ const login = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     await signIn("google", { callbackUrl: "/user/chatbot" });
+    localStorage.setItem("session-change", Date.now());
   };
 
   const handleRegisterRedirect = () => {
