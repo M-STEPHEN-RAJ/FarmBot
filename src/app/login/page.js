@@ -39,7 +39,10 @@ const login = () => {
       if (res.status === 200) {
         localStorage.setItem("session-change", Date.now());
         toast.success("Login successful!");
+
+        setLoading(false);
         router.push("/user/chatbot");
+        return;
       }
     } catch (error) {
       if (error.response?.status === 401) {

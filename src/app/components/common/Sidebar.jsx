@@ -77,6 +77,14 @@ const Sidebar = () => {
         </div>
 
         <div className="space-y-1">
+
+          <div className={`p-2 ${isActive("/user/cart") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>            
+            <img src="/images/sidebar/cart.png" alt="" className='w-6' />
+            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+              Cart
+            </div>
+          </div>          
+
           <div className={`p-2 ${isActive("/user/notification") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
             <span className='w-4 h-4 absolute top-1 right-1 flex justify-center items-center text-xs text-white bg-[#1B8841] rounded-full'>3</span>
             <img src="/images/sidebar/notification.png" alt="" className='w-6' />
