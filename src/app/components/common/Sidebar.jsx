@@ -35,7 +35,7 @@ const Sidebar = () => {
           <div className="space-y-1">
             <div className={`p-2 ${isActive("/user/dashboard") ? 'bg-gray-300 hover:bg-gray-400' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
               <img src="/images/sidebar/dashboard.png" alt="" className='w-6' />
-              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Dashboard
               </div>
             </div>
@@ -45,21 +45,24 @@ const Sidebar = () => {
               className={`p-2 ${isActive("/user/store") ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
             >
               <img src="/images/sidebar/farmstore.png" alt="" className='w-6' />
-              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm Store
               </div>
             </div>
 
             <div className={`p-2 ${isActive("/user/crop-recommendation") ? 'bg-gray-300 hover:bg-gray-400' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
               <img src="/images/sidebar/farmguide.png" alt="" className='w-6' />
-              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm Guide
               </div>
             </div>
 
-            <div className={`p-2 ${isActive("/user/plant-disease-detection") ? 'bg-gray-300 hover:bg-gray-400' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
+            <div 
+              onClick={() => navigate('/user/scanner')}
+              className={`p-2 ${isActive("/user/scanner") ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
+            >
               <img src="/images/sidebar/farmdoc.png" alt="" className='w-6' />
-              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm Doc
               </div>
             </div>
@@ -69,7 +72,7 @@ const Sidebar = () => {
               className={`p-2 ${isActive("/user/chatbot") ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
             >
               <img src="/images/sidebar/chatbot.png" alt="" className='w-6' />
-              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm AI
               </div>
             </div>
@@ -80,7 +83,7 @@ const Sidebar = () => {
 
           <div className={`p-2 ${isActive("/user/cart") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>            
             <img src="/images/sidebar/cart.png" alt="" className='w-6' />
-            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               Cart
             </div>
           </div>          
@@ -88,7 +91,7 @@ const Sidebar = () => {
           <div className={`p-2 ${isActive("/user/notification") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}>
             <span className='w-4 h-4 absolute top-1 right-1 flex justify-center items-center text-xs text-white bg-[#1B8841] rounded-full'>3</span>
             <img src="/images/sidebar/notification.png" alt="" className='w-6' />
-            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               Notification
             </div>
           </div>
@@ -98,7 +101,7 @@ const Sidebar = () => {
             className={`p-2 ${isActive("/user/settings") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
           >
             <img src="/images/sidebar/settings.png" alt="" className='w-6' />
-            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 pointer-events-none">
+            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               Settings
             </div>
           </div>
