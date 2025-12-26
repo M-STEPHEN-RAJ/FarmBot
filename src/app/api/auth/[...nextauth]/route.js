@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { initServer } from "@/app/backend/server";
 import User from "@/app/backend/models/User.js";
+import { API } from "@/app/utils/api";
 
 const handler = NextAuth({
   providers: [
@@ -15,10 +16,10 @@ const handler = NextAuth({
     async signIn({ user }) {
       await initServer();
 
-      const existingUser = await User.findOne({ email: user.email });
+      let dbUser = await User.findOne({ email: user.email });
 
-      if (!existingUser) {
-        await User.create({
+      if (!dbUser) {
+        dbUser = await User.create({
           name: user.name,
           email: user.email,
           avatar: user.image || "",
@@ -26,29 +27,21 @@ const handler = NextAuth({
           role: "user",
         });
       } else {
-        if (!existingUser.provider.includes("google")) {
-          existingUser.provider += ",google";
-        }
-
-        if (!existingUser.avatar && user.image) {
-          existingUser.avatar = user.image;
-        }
-
-        await existingUser.save();
+        if (!dbUser.provider.includes("google")) dbUser.provider += ",google";
+        if (!dbUser.avatar && user.image) dbUser.avatar = user.image;
+        await dbUser.save();
       }
 
-      return true;
+      return `${API}/auth/google/callback?email=${encodeURIComponent(user.email)}`;
     },
 
     async session({ session }) {
       await initServer();
       const dbUser = await User.findOne({ email: session.user.email });
-
       if (dbUser) {
         session.user.role = dbUser.role;
         session.user.provider = dbUser.provider;
       }
-
       return session;
     },
   },

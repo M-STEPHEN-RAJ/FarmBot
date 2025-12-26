@@ -23,7 +23,7 @@ export const registerUser = async (req) => {
             email,
             password: hashedPassword,
             role: role || "user",
-            avatar: avatar || "",
+            avatar: avatar || "https://res.cloudinary.com/dbqirapyz/image/upload/v1766351294/avatar_zrjmys.png",
             provider: "credentials",
         })
 

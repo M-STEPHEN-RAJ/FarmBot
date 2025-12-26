@@ -1,7 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 const SettingsSidebar = () => {
+
+  const router = useRouter();
+  const pathname = usePathname();
     
   const [usage, setUsage] = useState({ totalRequests: 0, maxRequests: 0 });
 
@@ -43,7 +47,10 @@ const SettingsSidebar = () => {
           </div>
 
           <div className="space-y-0.5 pr-2">
-            <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
+            <div 
+              onClick={() => router.push("/user/settings/accounts")} 
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-gray-100 ${pathname.includes("accounts") ? "bg-gray-200 hover:bg-gray-300" : ""} rounded-md cursor-pointer`}
+            >
               <img src="/images/settings/account.png" alt="" className='w-5' />
               <p className='text-sm'>Accounts</p>
             </div>

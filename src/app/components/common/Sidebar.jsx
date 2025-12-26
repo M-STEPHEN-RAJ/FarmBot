@@ -1,6 +1,8 @@
 "use client"
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
+import axios from "axios";
+import { API } from "@/app/utils/api";
 import Loading from './Loading';
 
 const Sidebar = () => {
@@ -8,6 +10,7 @@ const Sidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
 
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const isActive = (route) => pathname.startsWith(route);
@@ -17,6 +20,25 @@ const Sidebar = () => {
     setLoading(true);
     router.push(path);
   };
+
+  const fetchProfile = async () => {
+    try {
+      const res = await axios.get(`${API}/me`, {
+        withCredentials: true,
+      });
+
+      setUser(res.data.user);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     setLoading(false);
@@ -97,7 +119,7 @@ const Sidebar = () => {
           </div>
 
           <div 
-            onClick={() => navigate('/user/settings')} 
+            onClick={() => navigate('/user/settings/accounts')} 
             className={`p-2 ${isActive("/user/settings") ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-100'} rounded-md cursor-pointer group relative`}
           >
             <img src="/images/sidebar/settings.png" alt="" className='w-6' />
@@ -106,9 +128,14 @@ const Sidebar = () => {
             </div>
           </div>
 
-          <div className="hover:bg-gray-300 rounded-full cursor-pointer">
-            <img src="/images/sidebar/avatar.jpg" alt="" className='p-1 w-10 rounded-full' />
-          </div>
+          {user ? (
+            <div className="hover:bg-gray-300 rounded-full cursor-pointer">
+              <img src={user.avatar} alt="" className='p-1 w-10 rounded-full' />
+            </div>
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-gray-300 mx-auto mt-2 animate-pulse"></div>
+          )
+          }
         </div>
 
     </div>
