@@ -4,7 +4,7 @@ import ScannerSidebar from "@/app/components/scanner/ScannerSidebar";
 import React, { useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
 
-const Scanner = () => {
+const ScannerHome = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragEnter = useCallback(() => setIsDragging(true), []);
@@ -72,4 +72,4 @@ const Scanner = () => {
   );
 };
 
-export default Scanner;
+export default ScannerHome;

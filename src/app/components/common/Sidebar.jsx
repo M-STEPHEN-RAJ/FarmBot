@@ -1,6 +1,7 @@
 "use client"
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
+import Image from "next/image";
 import axios from "axios";
 import { API } from "@/app/utils/api";
 import Loading from './Loading';
@@ -28,6 +29,8 @@ const Sidebar = () => {
       });
 
       setUser(res.data.user);
+
+      console.log(res.data.user);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Something went wrong!");
@@ -130,7 +133,13 @@ const Sidebar = () => {
 
           {user ? (
             <div className="hover:bg-gray-300 rounded-full cursor-pointer">
-              <img src={user.avatar} alt="" className='p-1 w-10 rounded-full' />
+              <Image
+                src={user.avatar}
+                alt={user.name}
+                width={40}
+                height={40}
+                className="p-1 w-10 h-10 rounded-full"
+              />
             </div>
           ) : (
             <div className="w-9 h-9 rounded-full bg-gray-300 mx-auto mt-2 animate-pulse"></div>
