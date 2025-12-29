@@ -1,5 +1,46 @@
 import Product from "../models/Product.js";
 
+// Add a new product
+export const createProduct = async (body) => {
+  const {
+    name,
+    description,
+    category,
+    type,
+    price,
+    unit,
+    stock,
+    image,
+    popularity,
+    rating,
+    reviewCount,
+    reviews
+  } = body;
+
+  if (!name || !category || !type || !price) {
+    throw new Error("Missing required fields");
+  }
+
+  const newProduct = new Product({
+    name,
+    description,
+    category,
+    type,
+    price,
+    unit,
+    stock: stock || 0,
+    image,
+    popularity: popularity || 0,
+    rating: rating || 0,
+    reviewCount: reviewCount || 0,
+    reviews: reviews || []
+  });
+
+  const savedProduct = await newProduct.save();
+  return savedProduct;
+};
+
+// Fetch Products
 export const getProducts = async (query) => {
   const {
     category,

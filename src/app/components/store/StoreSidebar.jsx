@@ -24,7 +24,18 @@ const StoreSidebar = ({ filters, setFilters }) => {
 
   const categoryOptions = ["Seeds", "Fertilizers", "Tools"];
 
-  const typeOptions = ["Vegetables", "Fruits", "Flowers", "Grains", "Pulses"];
+  const getTypeOptions = (category) => {
+    switch (category) {
+      case "Seeds":
+        return ["Vegetables", "Fruits", "Flowers", "Grains", "Pulses"];
+      case "Fertilizers":
+        return ["Organic", "Chemical", "Bio-Fertilizers"];
+      case "Tools":
+        return ["Hand Tools", "Power Tools", "Protective Gear"];
+      default:
+        return [];
+    }
+  };
 
   const sortMap = {
     "Relevance": "popularity",
@@ -216,7 +227,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
               >
                 All
               </div>
-              {typeOptions.map((opt) => (
+              {getTypeOptions(selectedCategory).map((opt) => (
                 <div
                   key={opt}
                   onClick={() => handleTypeSelect(opt)}

@@ -57,7 +57,7 @@ export const predictScan = async ({ body, userId }) => {
       Disease: "${diseaseFull}"
       Confidence: ${confidence}%
 
-      Use bullet points (<ol><li>…</li></ol>), highlight important words with <b>bold</b> tags,
+      Use bullet points (<ol><li>…</li></ol>), highlight important words with <b>bold</b> tags only not with ** **,
       and provide practical advice for the farmer.
 
       Provide the output as JSON:
@@ -89,6 +89,7 @@ export const predictScan = async ({ body, userId }) => {
   await newScan.save();
 
   return {
+    _id: newScan._id,
     imageUrl,
     plantName,
     prediction: diseaseFull,
