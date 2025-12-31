@@ -28,10 +28,10 @@ export async function GET(req) {
   });
 
   return new Response(null, {
-    status: 302, // redirect
+    status: 302,
     headers: {
       "Set-Cookie": cookie,
-      Location: "/user/chatbot", // ✅ redirect after login
+      Location: "/user/chatbot",
     },
   });
 }

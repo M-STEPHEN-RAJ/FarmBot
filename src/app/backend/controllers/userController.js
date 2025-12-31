@@ -1,5 +1,68 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { uploadImage } from "@/app/utils/cloudinary.js";
+
+export const updateProfile = async (request) => {
+  try {
+    const cookie = request.headers.get("cookie") || "";
+    const match = cookie.match(/(^|;\s*)token=([^;]+)/);
+    const token = match?.[2];
+
+    if (!token) {
+      return new Response(
+        JSON.stringify({ message: "Not authenticated" }),
+        { status: 401 }
+      );
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded?.id) {
+      return new Response(
+        JSON.stringify({ message: "Invalid token!" }),
+        { status: 401 }
+      );
+    }
+
+    const formData = await request.formData();
+    const updates = {};
+
+    const name = formData.get("name");
+    const avatar = formData.get("avatar");
+
+    if (name) updates.name = name;
+
+    if (avatar && avatar.size > 0) {
+      const buffer = Buffer.from(await avatar.arrayBuffer());
+      const upload = await uploadImage(buffer);
+      updates.avatar = upload.secure_url;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return new Response(
+        JSON.stringify({ message: "Nothing to update!" }),
+        { status: 400 }
+      );
+    }
+
+    const user = await User.findByIdAndUpdate(
+      decoded.id,
+      { $set: updates },
+      { new: true }
+    ).select("-password");
+
+    return new Response(
+      JSON.stringify({ message: "Profile updated!", user }),
+      { status: 200 }
+    );
+
+  } catch (err) {
+    console.error("Profile update error:", err);
+    return new Response(
+      JSON.stringify({ message: "Server error" }),
+      { status: 500 }
+    );
+  }
+};
 
 export const getCurrentUser = async (request) => {
   try {
