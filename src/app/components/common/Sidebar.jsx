@@ -133,13 +133,7 @@ const Sidebar = () => {
 
           {user ? (
             <div className="hover:bg-gray-300 rounded-full cursor-pointer">
-              <Image
-                src={user.avatar}
-                alt={user.name}
-                width={40}
-                height={40}
-                className="p-1 w-10 h-10 rounded-full"
-              />
+              <img src={user.avatar} className="p-1 w-10 h-10 rounded-full" alt="" />
             </div>
           ) : (
             <div className="w-9 h-9 rounded-full bg-gray-300 mx-auto mt-2 animate-pulse"></div>

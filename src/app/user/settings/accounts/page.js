@@ -4,11 +4,13 @@ import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
 import EditNameModal from "@/app/components/settings/Modal/EditNameModal";
+import EditAvatarModal from "@/app/components/settings/Modal/EditAvatarModal";
 
 const Accounts = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditNameOpen, setisEditNameOpen] = useState(false);
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -50,12 +52,11 @@ const Accounts = () => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="relative">
-              <img
-                className="w-18 rounded-full cursor-pointer"
-                src={user.avatar}
-                alt=""
-              />
+            <div
+              onClick={() => setIsAvatarOpen(true)}
+              className="relative cursor-pointer"
+            >
+              <img className="w-18 rounded-full" src={user.avatar} alt="" />
               <div className="absolute -bottom-1 -right-1 p-1.5 border border-gray-300 bg-white rounded-full">
                 <img
                   src="/images/settings/camera.png"
@@ -106,6 +107,14 @@ const Accounts = () => {
           email={user.email}
           onClose={() => setisEditNameOpen(false)}
           onSave={(newName) => setUser((prev) => ({ ...prev, name: newName }))}
+        />
+      )}
+
+      {isAvatarOpen && (
+        <EditAvatarModal
+          currentAvatar={user.avatar}
+          onClose={() => setIsAvatarOpen(false)}
+          onSave={(avatar) => setUser((prev) => ({ ...prev, avatar }))}
         />
       )}
     </>
