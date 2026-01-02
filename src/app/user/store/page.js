@@ -1,10 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import StoreSidebar from "@/app/components/store/StoreSidebar";
 import axios from "axios";
 import { API } from "@/app/utils/api";
 
 const Store = () => {
+  const router = useRouter();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,7 @@ const Store = () => {
           {products.map((product) => (
             <div
               key={product._id}
+              onClick={() => router.push(`/user/store/${product._id}`)}
               className="relative w-[180px] h-[220px] border border-gray-300 rounded-xl px-2"
             >
               <img
@@ -63,7 +66,7 @@ const Store = () => {
                 <div className="flex justify-between items-center">
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map((num) => (
-                      <img 
+                      <img
                         key={num}
                         src={
                           num <= product.rating
@@ -75,27 +78,46 @@ const Store = () => {
                       />
                     ))}
                   </div>
-                  <p className="text-[10px] text-gray-500">{product.reviewCount} reviews</p>
+                  <p className="text-[10px] text-gray-500">
+                    {product.reviewCount} reviews
+                  </p>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <p className="text-sm font-medium">
                     ₹ {product.price}
-                    <span className="text-xs text-gray-600">/{product.unit}</span>
+                    <span className="text-xs text-gray-600">
+                      /{product.unit}
+                    </span>
                   </p>
 
                   <div className="flex items-center gap-3">
-                    <button className="h-5 w-5 text-red-500 bg-red-50 rounded-full cursor-pointer">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="h-5 w-5 text-red-500 bg-red-50 rounded-full cursor-pointer"
+                    >
                       −
                     </button>
                     <p className="text-sm">1</p>
-                    <button className="h-5 w-5 text-green-500 bg-green-50 rounded-full cursor-pointer">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="h-5 w-5 text-green-500 bg-green-50 rounded-full cursor-pointer"
+                    >
                       +
                     </button>
                   </div>
                 </div>
 
-                <button className="w-full py-1.5 text-sm text-white bg-[#166831] rounded-md cursor-pointer mt-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="w-full py-1.5 text-sm text-white bg-[#166831] rounded-md cursor-pointer mt-1"
+                >
                   Add to Cart
                 </button>
               </div>

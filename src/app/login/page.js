@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { signIn } from "next-auth/react";
-import { sign } from "jsonwebtoken";
 import Loading from "../components/common/Loading";
+import { API } from "../utils/api";
 
-const login = () => {
+const Login = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ const login = () => {
         return;
       }
 
-      const res = await axios.post("/api/auth/login", formData, {
+      const res = await axios.post(`${API}/auth/login`, formData, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" }
       });
@@ -201,4 +201,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;

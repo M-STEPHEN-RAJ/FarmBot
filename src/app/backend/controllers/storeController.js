@@ -96,3 +96,18 @@ export const getProducts = async (query) => {
 
   return await Product.find(filter).sort(sortOption);
 };
+
+// Get product by ID
+export const getProductById = async (id) => {
+  if (!id) {
+    throw new Error("Product ID is required!");
+  }
+
+  const product = await Product.findById(id);
+
+  if (!product) {
+    throw new Error("Product not found!");
+  }
+
+  return product;
+};
