@@ -50,7 +50,7 @@ const Sidebar = () => {
   return (
     <>
     { loading && <Loading /> }
-    <div className="h-[calc(100vh-8px)] flex flex-col justify-between items-center p-2 border border-gray-300 rounded-md">
+    <div className="h-[calc(100vh-8px)] flex flex-col justify-between items-center p-2 border border-gray-300 rounded-md overflow-y-auto">
 
         <div className="flex flex-col gap-3 items-center">
           <div className="w-10 h-10 flex justify-center items-center border border-gray-300 rounded-md">

@@ -5,12 +5,12 @@ import SessionWatcher from '../providers/SessionWatcher'
 const UserLayout = ({ children }) => {
   return (
     <SessionWatcher>
-      <div className="flex w-full h-screen">
-          <div className="p-1">
+      <div className="flex w-full min-h-screen">
+          <div className="p-1 sticky top-0 h-screen">
             <Sidebar />
           </div>
 
-          <main className="flex-1 flex justify-center items-center">
+          <main className="flex-1 flex justify-center">
               {children}
           </main>
       </div>

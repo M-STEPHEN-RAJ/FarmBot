@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 
 // Add a new product
 export const createProduct = async (body) => {
@@ -12,13 +13,10 @@ export const createProduct = async (body) => {
     stock,
     image,
     popularity,
-    rating,
-    reviewCount,
-    reviews
   } = body;
 
   if (!name || !category || !type || !price) {
-    throw new Error("Missing required fields");
+    throw new Error("Missing required fields!");
   }
 
   const newProduct = new Product({
@@ -31,9 +29,6 @@ export const createProduct = async (body) => {
     stock: stock || 0,
     image,
     popularity: popularity || 0,
-    rating: rating || 0,
-    reviewCount: reviewCount || 0,
-    reviews: reviews || []
   });
 
   const savedProduct = await newProduct.save();
@@ -104,10 +99,44 @@ export const getProductById = async (id) => {
   }
 
   const product = await Product.findById(id);
-
   if (!product) {
     throw new Error("Product not found!");
   }
 
-  return product;
+  const reviewsWithUser = await Promise.all(
+    product.reviews.map(async (r) => {
+      let user = null;
+
+      if (r.userId) {
+        user = await User.findById(r.userId).select("name avatar");
+      }
+
+      return {
+        _id: r._id,
+        userId: r.userId,
+        userName: r.userName || user?.name || "Unknown",
+        userAvatar:
+          r.userAvatar ||
+          user?.avatar ||
+          "https://res.cloudinary.com/dbqirapyz/image/upload/v1766351294/avatar_zrjmys.png",
+        rating: r.rating,
+        comment: r.comment || "",
+        images: r.images || [],
+        likes: r.likes || [],
+        dislikes: r.dislikes || [],
+        isVerifiedPurchase: r.isVerifiedPurchase ?? false,
+        reportCount: r.reportCount ?? 0,
+        isHidden: r.isHidden ?? false,
+        isEdited: r.isEdited ?? false,
+        editedAt: r.editedAt || null,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+      };
+    })
+  );
+
+  const mappedProduct = product.toObject();
+  mappedProduct.reviews = reviewsWithUser;
+
+  return mappedProduct;
 };

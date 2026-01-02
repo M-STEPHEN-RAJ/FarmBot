@@ -15,7 +15,7 @@ const Loading = () => {
   if (!animationData) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-100">
       <Lottie
         animationData={animationData}
         loop={true}

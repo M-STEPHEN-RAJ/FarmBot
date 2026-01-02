@@ -2,11 +2,32 @@ import mongoose from "mongoose";
 
 const reviewSchema = new mongoose.Schema(
   {
-    userId: mongoose.Schema.Types.ObjectId,
+    userId: { type: mongoose.Schema.Types.ObjectId, required: true },
     userName: String,
     userAvatar: String,
-    rating: { type: Number, min: 1, max: 5 },
+
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
+      set: (v) => Math.round(v * 10) / 10,
+    },
+
     comment: String,
+
+    images: { type: [String], default: [] },
+
+    likes: { type: [mongoose.Schema.Types.ObjectId], default: [] },
+    dislikes: { type: [mongoose.Schema.Types.ObjectId], default: [] },
+
+    isVerifiedPurchase: { type: Boolean, default: false },
+
+    reportCount: { type: Number, default: 0 },
+    isHidden: { type: Boolean, default: false },
+
+    isEdited: { type: Boolean, default: false },
+    editedAt: Date,
   },
   { timestamps: true }
 );
@@ -22,7 +43,13 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     unit: String,
 
-    rating: { type: Number, default: 0 },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+      set: (v) => Math.round(v * 10) / 10,
+    },
     reviewCount: { type: Number, default: 0 },
 
     reviews: [reviewSchema],
