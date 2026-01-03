@@ -68,3 +68,50 @@ export async function getCart(userId) {
 
   return cart;
 }
+
+// Update or remove cart item
+export async function updateCart({ userId, productId, quantity, action }) {
+  let cart = await Cart.findOne({ userId });
+  if (!cart) throw { status: 404, message: "Cart not found!" };
+
+  const itemIndex = cart.items.findIndex(
+    (item) => item.productId.toString() === productId
+  );
+
+  if (itemIndex === -1)
+    throw { status: 404, message: "Item not found in cart!" };
+
+  if (action === "remove") {
+    cart.items.splice(itemIndex, 1);
+  }
+
+  if (action === "update") {
+    if (!quantity || quantity < 1)
+      throw { status: 400, message: "Invalid quantity!" };
+
+    const product = await Product.findById(productId);
+    if (!product) throw { status: 404, message: "Product not found!" };
+
+    if (quantity > product.stock)
+      throw {
+        status: 400,
+        message: `Only ${product.stock} items available!`,
+      };
+
+    cart.items[itemIndex].quantity = quantity;
+    cart.items[itemIndex].stock = product.stock;
+    cart.items[itemIndex].isOutOfStock = product.stock <= 0;
+  }
+
+  cart.totalItems = cart.items.reduce(
+    (acc, item) => acc + item.quantity,
+    0
+  );
+  cart.totalPrice = cart.items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  await cart.save();
+  return cart;
+}

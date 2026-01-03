@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { gsap } from "gsap";
 import axios from "axios";
 import { toast } from 'react-hot-toast';
 import { API } from "@/app/utils/api";
@@ -12,6 +13,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
 
   const dropdownRef = useRef(null);
   const router = useRouter();
+  const scanRefs = useRef([]);
 
   const fetchScans = async () => {
     setLoading(true);
@@ -45,6 +47,16 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
   const handleNewScan = () => {
     router.push("/user/scanner");
   };
+
+  useEffect(() => {
+    if (scans.length > 0) {
+      gsap.fromTo(
+        scanRefs.current,
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" }
+      );
+    }
+  }, [scans]);
 
   useEffect(() => {
     fetchScans();
@@ -102,9 +114,10 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
               </div>
             ))}
 
-          {scans.map((scan) => (
+          {scans.map((scan, index) => (
             <div
               key={scan._id}
+              ref={(el) => scanRefs.current[index] = el}
               onClick={() => {
                 router.push(`/user/scanner/${scan._id}`);
               }}

@@ -11,6 +11,8 @@ const ProductDetails = () => {
   const params = useParams();
   const { id } = params;
 
+  const [quantity, setQuantity] = useState(1);
+
   const [currentUser, setCurrentUser] = useState(null);
   const [reviewSort, setReviewSort] = useState("Top");
   const [filterRating, setFilterRating] = useState(null);
@@ -46,6 +48,25 @@ const ProductDetails = () => {
   useEffect(() => {
     if (id) fetchProduct();
   }, [id]);
+
+  // Add to Cart
+  const handleAddToCart = async () => {
+    if (!product || product.stock === 0) return;
+
+    try {
+      const res = await axios.post(
+        `${API}/cart`,
+        { productId: product._id, quantity },
+        { withCredentials: true }
+      );
+
+      toast.success("Added to cart!");
+      console.log("Cart updated:", res.data.cart);
+    } catch (err) {
+      console.error("Add to cart failed:", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Failed to add to cart");
+    }
+  };
 
   const handleDelete = async (reviewId) => {
     try {
@@ -258,12 +279,12 @@ const ProductDetails = () => {
           <div className="">
             <p className="text-2xl font-medium flex items-start gap-1">
               <span className="text-sm font-normal mt-[1.8px]">₹</span>
-              {product.price}.00
+              {product.price * quantity}.00
               <span className="text-gray-600 text-sm mt-1.5">
                 /{product.unit}
               </span>
             </p>
-            {product.price >= 499 ? (
+            {product.price * quantity >= 499 ? (
               <p className="text-sm font-medium">FREE Delivery</p>
             ) : (
               <p className="text-sm font-medium">+ ₹40 Delivery Fee</p>
@@ -297,11 +318,17 @@ const ProductDetails = () => {
             <div className="flex justify-between">
               <p className="text-sm text-gray-600 font-medium">Quantity</p>
               <div className="w-[100px] flex justify-between items-center">
-                <button className="flex justify-center items-center h-5 w-5 text-xl font-medium text-red-500 bg-red-100 rounded cursor-pointer">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(q - 1, 1))}
+                  className="flex justify-center items-center h-5 w-5 text-xl font-medium text-red-500 bg-red-100 rounded cursor-pointer"
+                >
                   −
                 </button>
-                <p className="w-5 text-center">1</p>
-                <button className="flex justify-center items-center h-5 w-5 text-xl font-medium text-green-500 bg-green-100 rounded cursor-pointer">
+                <p className="w-5 text-center">{quantity}</p>
+                <button
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="flex justify-center items-center h-5 w-5 text-xl font-medium text-green-500 bg-green-100 rounded cursor-pointer"
+                >
                   +
                 </button>
               </div>
@@ -310,6 +337,7 @@ const ProductDetails = () => {
             <div className="flex flex-col gap-4">
               <button
                 disabled={product.stock === 0}
+                onClick={handleAddToCart}
                 className="text-white bg-[#166831] rounded-md py-1 px-4 cursor-pointer"
               >
                 Add to Cart
@@ -373,7 +401,9 @@ const ProductDetails = () => {
                   <div className="flex-1 h-4 bg-gray-200 rounded overflow-hidden">
                     <div
                       className="h-4 bg-[#166831] rounded"
-                      style={{ width: `${(count / product.reviewCount) * 100}%` }}
+                      style={{
+                        width: `${(count / product.reviewCount) * 100}%`,
+                      }}
                     ></div>
                   </div>
 
@@ -492,7 +522,10 @@ const ProductDetails = () => {
                         </div>
 
                         {activeMenu === review._id && (
-                          <div ref={menuRef} className="absolute right-0 mt-2 w-24 bg-white border border-gray-300 rounded-md z-10">
+                          <div
+                            ref={menuRef}
+                            className="absolute right-0 mt-2 w-24 bg-white border border-gray-300 rounded-md z-10"
+                          >
                             {currentUser &&
                             currentUser._id === review.userId ? (
                               <>

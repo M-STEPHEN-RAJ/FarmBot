@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from "next/navigation";
+import { gsap } from 'gsap';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { API } from '../../../app/utils/api.js'
@@ -13,6 +14,7 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
 
   const router = useRouter();
   const dropdownRef = useRef(null);
+  const chatRefs = useRef([]);
 
   // Fetch all converstions
   const fetchConversations = async () => {
@@ -50,6 +52,16 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
   const handleNewChat = async () => {
     router.push('/user/chatbot');
   };
+
+  useEffect(() => {
+    if (conversations.length > 0) {
+      gsap.fromTo(
+        chatRefs.current,
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" }
+      );
+    }
+  }, [conversations]);
 
   useEffect(() => {
     fetchConversations();
@@ -106,9 +118,10 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
             ))
           }
 
-          {conversations.map((chat) => (
+          {conversations.map((chat, index) => (
             <div 
               key={chat._id} 
+              ref={(el) => chatRefs.current[index] = el}
               onClick={() => {
                 router.push(`/user/chatbot/${chat._id}`);
               }}
