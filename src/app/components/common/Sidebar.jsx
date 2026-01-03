@@ -33,7 +33,6 @@ const Sidebar = () => {
       console.log(res.data.user);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Something went wrong!");
     } finally {
       setLoading(false);
     }

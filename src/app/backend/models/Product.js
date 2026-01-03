@@ -23,6 +23,7 @@ const reviewSchema = new mongoose.Schema(
 
     isVerifiedPurchase: { type: Boolean, default: false },
 
+    reporters: { type: [mongoose.Schema.Types.ObjectId], default: [] },
     reportCount: { type: Number, default: 0 },
     isHidden: { type: Boolean, default: false },
 

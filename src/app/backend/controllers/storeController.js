@@ -126,6 +126,7 @@ export const getProductById = async (id) => {
         dislikes: r.dislikes || [],
         isVerifiedPurchase: r.isVerifiedPurchase ?? false,
         reportCount: r.reportCount ?? 0,
+        reporters: r.reporters || [],
         isHidden: r.isHidden ?? false,
         isEdited: r.isEdited ?? false,
         editedAt: r.editedAt || null,
