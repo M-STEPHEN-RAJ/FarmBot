@@ -44,7 +44,7 @@ const EditNameModal = ({ currentName, email, onClose, onSave }) => {
             className="w-6 flex justify-between items-center hover:bg-gray-100 rounded-full cursor-pointer"
           >
             <img
-              src="/images/settings/close.png"
+              src="/images/user/settings/close.png"
               className="w-4.5 h-4.5 mx-auto"
               alt=""
             />

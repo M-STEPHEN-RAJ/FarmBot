@@ -234,7 +234,7 @@ const ChatBot = () => {
                   onClick={text.length > 0 ? sendMessage : startListening}
                 >
                   <img
-                    src={`/images/chatbot/${
+                    src={`/images/user/chatbot/${
                       text.length > 0 ? "send" : "microphone"
                     }.png`}
                     alt=""

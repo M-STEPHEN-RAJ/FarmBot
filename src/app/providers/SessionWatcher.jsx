@@ -15,11 +15,11 @@ export default function SessionWatcher({ children }) {
 
       if (res.status !== 200 || !res.data?.ok) {
         toast.error("You have been logged out due to session change.");
-        router.push("/login");
+        router.push("/user/login");
       }
     } catch (err) {
       toast.error("Session expired. Please login again.");
-      router.push("/login");
+      router.push("/user/login");
     }
   };
 

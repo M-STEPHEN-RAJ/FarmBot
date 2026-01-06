@@ -101,7 +101,7 @@ const EditAvatarModal = ({ currentAvatar, onClose, onSave }) => {
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">Update Avatar</h3>
           <img
-            src="/images/settings/close.png"
+            src="/images/user/settings/close.png"
             className="w-4.5 cursor-pointer"
             onClick={onClose}
           />

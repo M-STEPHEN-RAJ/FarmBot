@@ -194,7 +194,7 @@ const Cart = () => {
                   ) : (
                     <img
                       className="w-4 cursor-pointer"
-                      src="/images/cart/delete.png"
+                      src="/images/user/cart/delete.png"
                       alt=""
                       onClick={() => decrementQty(item)}
                     />

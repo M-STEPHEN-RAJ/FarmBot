@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { signIn } from "next-auth/react";
-import Loading from '../components/common/Loading';
+import Loading from '../../components/common/Loading';
 
 const register = () => {
 
@@ -34,7 +34,7 @@ const register = () => {
 
       const { data } = await axios.post("/api/auth/register", formData);
       toast.success(data.message);
-      router.push("/login");
+      router.push("/user/login");
     }
     catch (error) {
       if (error.response && error.response.data?.message) {
@@ -56,7 +56,7 @@ const register = () => {
 
   const handleLoginRedirect = () => {
     setLoading(true);
-    router.push('/login');
+    router.push('/user/login');
   }
 
   return (
@@ -74,7 +74,7 @@ const register = () => {
 
           <div className="space-y-5">
             <div onClick={handleGoogleSignUp} className="flex justify-center items-center gap-5 rounded-md py-2.5 border border-gray-300 cursor-pointer">
-              <img src="/images/login/google.png" alt="" className='w-5' />
+              <img src="/images/user/login/google.png" alt="" className='w-5' />
               <p>Continue with Google</p>
             </div>
             <div className="flex justify-center items-center gap-5">
@@ -143,21 +143,21 @@ const register = () => {
       <div className="relative w-1/2 h-full bg-[#166831]">
 
         <div className="absolute top-0 -left-0.5">
-          <img src="/images/login/login-1.png" alt="" className="w-[200px] h-auto" />
+          <img src="/images/user/login/login-1.png" alt="" className="w-[200px] h-auto" />
 
         </div>
         <div className="absolute -bottom-6.5 right-0">
-          <img src="/images/login/login-2.png" alt="" className="w-[280px] h-auto" />
+          <img src="/images/user/login/login-2.png" alt="" className="w-[280px] h-auto" />
         </div>
         <div className="flex items-center absolute top-5 right-5">
-          <img src="/images/login/logo.png" alt="" className="w-20 h-auto" />
+          <img src="/images/user/login/logo.png" alt="" className="w-20 h-auto" />
           <h2 className='text-white text-xl font-semibold'>FarmBot</h2>
         </div>
 
         <div className="relative w-full h-full z-10">
 
           <div className="w-full h-full flex flex-col justify-center items-center -mt-7">
-            <img src="/images/login/login-bg.png" alt="" className="w-[450px] h-auto" />
+            <img src="/images/user/login/login-bg.png" alt="" className="w-[450px] h-auto" />
             <div className="flex flex-col justify-center items-center gap-5">
               <h2 className='text-xl text-white font-semibold'>Farm Smarter, Not Harder</h2>
               <p className='w-[70%] text-base text-gray-200 text-center'>FarmBot automates your farming tasks, helping you grow more efficiently with precision and care.</p>

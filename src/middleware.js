@@ -6,7 +6,17 @@ export async function middleware(req) {
     
   const { pathname } = req.nextUrl;
 
-  // protect /user/* routes
+  const publicRoutes = [
+    "/user/login",
+    "/user/register",
+    "/user/forgot-password",
+  ];
+
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
+  
+  // protect /user routes
   if (!pathname.startsWith("/user")) {
     return NextResponse.next();
   }
@@ -31,7 +41,7 @@ export async function middleware(req) {
 
   // Block access if neither exists
   if (!googleSession && !jwtValid) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/user/login", req.url));
   }
 
   return NextResponse.next();

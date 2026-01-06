@@ -31,7 +31,7 @@ const SettingsSidebar = () => {
           <h2 className="text-medium">Settings</h2>
           <div className="p-1 hover:bg-gray-100 rounded-md cursor-pointer">
             <img
-              src="/images/chatbot/closepanel.svg"
+              src="/images/user/chatbot/closepanel.svg"
               alt=""
               className="w-5"
             />
@@ -41,7 +41,7 @@ const SettingsSidebar = () => {
         <div className="space-y-2">
           <div className="space-y-0.5 pr-2">
             <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
-              <img src="/images/settings/general.png" alt="" className='w-5' />
+              <img src="/images/user/settings/general.png" alt="" className='w-5' />
               <p className='text-sm'>General</p>
             </div>
           </div>
@@ -51,28 +51,28 @@ const SettingsSidebar = () => {
               onClick={() => router.push("/user/settings/accounts")} 
               className={`px-2 py-2 flex items-center gap-3 hover:bg-gray-100 ${pathname.includes("accounts") ? "bg-gray-200 hover:bg-gray-300" : ""} rounded-md cursor-pointer`}
             >
-              <img src="/images/settings/account.png" alt="" className='w-5' />
+              <img src="/images/user/settings/account.png" alt="" className='w-5' />
               <p className='text-sm'>Accounts</p>
             </div>
           </div>
 
           <div className="space-y-0.5 pr-2">
             <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
-              <img src="/images/settings/privacy.png" alt="" className='w-5' />
+              <img src="/images/user/settings/privacy.png" alt="" className='w-5' />
               <p className='text-sm'>Privacy</p>
             </div>
           </div>
 
           <div className="space-y-0.5 pr-2">
             <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
-              <img src="/images/settings/support.png" alt="" className='w-5' />
+              <img src="/images/user/settings/support.png" alt="" className='w-5' />
               <p className='text-sm'>Support</p>
             </div>
           </div>
 
           <div className="space-y-0.5 pr-2">
             <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
-              <img src="/images/settings/notification.png" alt="" className='w-5' />
+              <img src="/images/user/settings/notification.png" alt="" className='w-5' />
               <p className='text-sm'>Notification</p>
             </div>
           </div>

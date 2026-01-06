@@ -142,22 +142,22 @@ const ScannerHome = () => {
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#166831]/80 pointer-events-none">
                 <img
                   className="absolute w-10 top-5 left-5"
-                  src="/images/scanner/overlay.png"
+                  src="/images/user/scanner/overlay.png"
                   alt=""
                 />
                 <img
                   className="absolute w-10 top-5 right-5 rotate-90"
-                  src="/images/scanner/overlay.png"
+                  src="/images/user/scanner/overlay.png"
                   alt=""
                 />
                 <img
                   className="absolute w-10 bottom-5 left-5 rotate-270"
-                  src="/images/scanner/overlay.png"
+                  src="/images/user/scanner/overlay.png"
                   alt=""
                 />
                 <img
                   className="absolute w-10 bottom-5 right-5 rotate-180"
-                  src="/images/scanner/overlay.png"
+                  src="/images/user/scanner/overlay.png"
                   alt=""
                 />
                 <p className="text-white text-3xl font-bold text-center">

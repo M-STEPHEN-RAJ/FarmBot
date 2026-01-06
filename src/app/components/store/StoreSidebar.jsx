@@ -160,7 +160,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
         <div className="flex justify-between items-center px-2">
           <h2 className="text-medium">Farm Store</h2>
           <div className="p-1 hover:bg-gray-100 rounded-md cursor-pointer">
-            <img src="/images/chatbot/closepanel.svg" alt="" className="w-5" />
+            <img src="/images/user/chatbot/closepanel.svg" alt="" className="w-5" />
           </div>
         </div>
 
@@ -173,7 +173,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
               placeholder={`search for ${selectedCategory}`}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <img src="/images/store/search.png" alt="" className="w-5" />
+            <img src="/images/user/store/search.png" alt="" className="w-5" />
           </div>
         </div>
       </div>
@@ -211,7 +211,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
           >
             {selectedType || "All"}
             <img
-              src="/images/store/dropdown.png"
+              src="/images/user/store/dropdown.png"
               alt=""
               className={`w-4 transition-all duration-200 ${
                 openType ? "rotate-180" : ""
@@ -343,7 +343,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
           >
             {selectedSort}
             <img
-              src="/images/store/dropdown.png"
+              src="/images/user/store/dropdown.png"
               alt=""
               className={`w-4 transition-all duration-200 ${
                 openSort ? "rotate-180" : ""
@@ -379,8 +379,8 @@ const StoreSidebar = ({ filters, setFilters }) => {
                 key={num}
                 src={
                   num <= rating
-                    ? "/images/store/star-active.png"
-                    : "/images/store/star.png"
+                    ? "/images/user/store/star-active.png"
+                    : "/images/user/store/star.png"
                 }
                 alt=""
                 className="w-6 cursor-pointer"

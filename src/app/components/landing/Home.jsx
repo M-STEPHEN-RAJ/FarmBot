@@ -31,7 +31,7 @@ const Home = () => {
 
   const handleGetStartedRedirect = () => {
       setLoading(true);
-      router.push('/login');
+      router.push('/user/login');
   }
 
   return (

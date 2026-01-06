@@ -177,7 +177,7 @@ const ProductDetails = () => {
           onClick={() => router.push("/user/store")}
           className="rounded-full p-2 hover:bg-gray-200 cursor-pointer"
         >
-          <img className="w-5" src="/images/store/back.png" alt="" />
+          <img className="w-5" src="/images/user/store/back.png" alt="" />
         </div>
       </div>
       <div className="w-full grid grid-cols-[2fr_3fr_1.5fr] gap-6">
@@ -197,8 +197,8 @@ const ProductDetails = () => {
                     key={num}
                     src={
                       num <= product.rating
-                        ? "/images/store/star-active.png"
-                        : "/images/store/star.png"
+                        ? "/images/user/store/star-active.png"
+                        : "/images/user/store/star.png"
                     }
                     className="w-6"
                     alt=""
@@ -237,7 +237,7 @@ const ProductDetails = () => {
               <div className="bg-gray-100 p-2 rounded-full">
                 <img
                   className="w-6.5"
-                  src="/images/store/cash-on-delivery.png"
+                  src="/images/user/store/cash-on-delivery.png"
                   alt=""
                 />
               </div>
@@ -250,7 +250,7 @@ const ProductDetails = () => {
               <div className="bg-gray-100 p-2 rounded-full">
                 <img
                   className="w-6.5"
-                  src="/images/store/top-brands.png"
+                  src="/images/user/store/top-brands.png"
                   alt=""
                 />
               </div>
@@ -261,7 +261,7 @@ const ProductDetails = () => {
             </div>
             <div className="flex flex-col justify-center items-center gap-1.5">
               <div className="bg-gray-100 p-2 rounded-full">
-                <img className="w-6.5" src="/images/store/secure.png" alt="" />
+                <img className="w-6.5" src="/images/user/store/secure.png" alt="" />
               </div>
               <p className="text-xs text-center">
                 Secure <br />
@@ -292,7 +292,7 @@ const ProductDetails = () => {
           </div>
 
           <div className="flex items-center gap-2 cursor-pointer">
-            <img className="w-4" src="/images/store/location.png" alt="" />
+            <img className="w-4" src="/images/user/store/location.png" alt="" />
             <p className="w-40 text-sm truncate hover:underline">
               902, MiddleStreet, Chinnammalpuram, Dhalapathysamudram.
             </p>
@@ -365,8 +365,8 @@ const ProductDetails = () => {
                     key={num}
                     src={
                       num <= product.rating
-                        ? "/images/store/star-active.png"
-                        : "/images/store/star.png"
+                        ? "/images/user/store/star-active.png"
+                        : "/images/user/store/star.png"
                     }
                     className="w-5 h-5"
                     alt=""
@@ -516,7 +516,7 @@ const ProductDetails = () => {
                         >
                           <img
                             className="w-4"
-                            src="/images/store/more.png"
+                            src="/images/user/store/more.png"
                             alt=""
                           />
                         </div>
@@ -535,7 +535,7 @@ const ProductDetails = () => {
                                 >
                                   <img
                                     className="w-4"
-                                    src="/images/store/edit.png"
+                                    src="/images/user/store/edit.png"
                                     alt=""
                                   />
                                   Edit
@@ -546,7 +546,7 @@ const ProductDetails = () => {
                                 >
                                   <img
                                     className="w-4"
-                                    src="/images/store/delete.png"
+                                    src="/images/user/store/delete.png"
                                     alt=""
                                   />
                                   Delete
@@ -562,7 +562,7 @@ const ProductDetails = () => {
                               >
                                 <img
                                   className="w-4"
-                                  src="/images/store/report.png"
+                                  src="/images/user/store/report.png"
                                   alt=""
                                 />
                                 Report
@@ -579,8 +579,8 @@ const ProductDetails = () => {
                             key={num}
                             src={
                               num <= review.rating
-                                ? "/images/store/star-active.png"
-                                : "/images/store/star.png"
+                                ? "/images/user/store/star-active.png"
+                                : "/images/user/store/star.png"
                             }
                             className="w-4.5 h-4.5"
                             alt=""
@@ -637,7 +637,7 @@ const ProductDetails = () => {
                       >
                         <img
                           className="w-4.5"
-                          src="/images/store/like.png"
+                          src="/images/user/store/like.png"
                           alt=""
                         />
                         <p className="text-xs">
@@ -657,7 +657,7 @@ const ProductDetails = () => {
                       >
                         <img
                           className="w-4.5"
-                          src="/images/store/dislike.png"
+                          src="/images/user/store/dislike.png"
                           alt=""
                         />
                         <p className="text-xs">

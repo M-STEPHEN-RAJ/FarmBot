@@ -33,7 +33,7 @@ const Accounts = () => {
 
       localStorage.clear();
 
-      window.location.href = "/login";
+      window.location.href = "/user/login";
     } catch (err) {
       console.error("Logout failed", err);
     }
@@ -59,7 +59,7 @@ const Accounts = () => {
               <img className="w-18 rounded-full" src={user.avatar} alt="" />
               <div className="absolute -bottom-1 -right-1 p-1.5 border border-gray-300 bg-white rounded-full">
                 <img
-                  src="/images/settings/camera.png"
+                  src="/images/user/settings/camera.png"
                   className="w-4.5"
                   alt=""
                 />
@@ -85,7 +85,7 @@ const Accounts = () => {
             className="border border-gray-300 py-1 px-3 rounded-md cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <img src="/images/settings/edit.png" className="w-5" alt="" />
+              <img src="/images/user/settings/edit.png" className="w-5" alt="" />
               <p className="text-sm">Edit</p>
             </div>
           </div>

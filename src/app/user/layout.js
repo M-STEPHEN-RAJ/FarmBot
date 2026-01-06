@@ -11,15 +11,19 @@ const UserLayout = ({ children }) => {
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
 
+  const hideSidebar =
+    pathname === "/user/login" ||
+    pathname === "/user/register";
+
   useEffect(() => {
-    if (sidebarRef.current) {
+    if (!hideSidebar && sidebarRef.current) {
       gsap.fromTo(
         sidebarRef.current,
         { x: -200, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }
       );
     }
-  }, []);
+  }, [hideSidebar]);
 
   useEffect(() => {
     setLoading(false);
@@ -29,9 +33,11 @@ const UserLayout = ({ children }) => {
     <SessionWatcher>
       {loading && <Loading />}
       <div className="flex w-full min-h-screen">
-        <div ref={sidebarRef} className="p-1 sticky top-0 h-screen z-50">
-          <Sidebar loading={loading} setLoading={setLoading} />
-        </div>
+        {!hideSidebar && (
+          <div ref={sidebarRef} className="p-1 sticky top-0 h-screen z-50">
+            <Sidebar loading={loading} setLoading={setLoading} />
+          </div>
+        )}
 
         <main className="flex-1 flex justify-center">{children}</main>
       </div>

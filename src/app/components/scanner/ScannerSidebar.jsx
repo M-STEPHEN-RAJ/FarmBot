@@ -80,7 +80,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
         <div className="flex justify-between items-center px-2">
           <h2 className="text-medium">Farm Doc</h2>
           <div className="p-1 hover:bg-gray-100 rounded-md cursor-pointer">
-            <img src="/images/chatbot/closepanel.svg" alt="" className="w-5" />
+            <img src="/images/user/chatbot/closepanel.svg" alt="" className="w-5" />
           </div>
         </div>
 
@@ -89,11 +89,11 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
             onClick={handleNewScan}
             className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer"
           >
-            <img src="/images/chatbot/newchat.png" alt="" className="w-5" />
+            <img src="/images/user/chatbot/newchat.png" alt="" className="w-5" />
             <p className="text-sm">New Scan</p>
           </div>
           <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
-            <img src="/images/chatbot/search.png" alt="" className="w-5" />
+            <img src="/images/user/chatbot/search.png" alt="" className="w-5" />
             <p className="text-sm">Search scans</p>
           </div>
         </div>
@@ -133,7 +133,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                   e.stopPropagation();
                   setOpenMenuId(openMenuId === scan._id ? null : scan._id);
                 }}
-                src="/images/chatbot/more.png"
+                src="/images/user/chatbot/more.png"
                 alt=""
                 className={`w-4 mr-1.5 opacity-0 ${
                   openMenuId === scan._id ? "opacity-100" : ""
@@ -149,7 +149,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                     onClick={() => setOpenMenuId(null)}
                     className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-gray-100 text-gray-600 rounded-b-md cursor-pointer"
                   >
-                    <img src="/images/chatbot/rename.png" className='h-4.5 w-4.5' alt="" />  
+                    <img src="/images/user/chatbot/rename.png" className='h-4.5 w-4.5' alt="" />  
                     Rename
                   </div>
                   <div
@@ -159,7 +159,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                     }}
                     className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-red-50 text-red-600 rounded-t-md cursor-pointer"
                   >
-                    <img src="/images/chatbot/delete.png" className='h-4.5 w-4.5' alt="" />                    
+                    <img src="/images/user/chatbot/delete.png" className='h-4.5 w-4.5' alt="" />                    
                     Delete
                   </div>
                 </div>

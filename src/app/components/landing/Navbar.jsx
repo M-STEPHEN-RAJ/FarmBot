@@ -38,12 +38,12 @@ const Navbar = () => {
 
   const handleRegisterRedirect = () => {
     setLoading(true);
-    router.push('/register');
+    router.push('/user/register');
   }
 
   const handleLoginRedirect = () => {
     setLoading(true);
-    router.push("/login");
+    router.push("/user/login");
   };
 
   return (
