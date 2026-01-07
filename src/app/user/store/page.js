@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
-import StoreSidebar from "@/app/components/store/StoreSidebar";
+import StoreSidebar from "@/app/components/user/store/StoreSidebar";
 
 const Store = () => {
   const router = useRouter();

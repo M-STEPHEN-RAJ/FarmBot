@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
-import EditNameModal from "@/app/components/settings/Modal/EditNameModal";
-import EditAvatarModal from "@/app/components/settings/Modal/EditAvatarModal";
+import EditNameModal from "@/app/components/user/settings/Modal/EditNameModal";
+import EditAvatarModal from "@/app/components/user/settings/Modal/EditAvatarModal";
 
 const Accounts = () => {
   const [user, setUser] = useState(null);

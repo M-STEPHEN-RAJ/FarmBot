@@ -1,5 +1,5 @@
 "use client";
-import SettingsSidebar from "@/app/components/settings/SettingsSidebar";
+import SettingsSidebar from "@/app/components/user/settings/SettingsSidebar";
 
 export default function SettingsLayout({ children }) {
   return (

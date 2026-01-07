@@ -1,5 +1,5 @@
 "use client";
-import ChatSidebar from "@/app/components/chatbot/ChatSidebar";
+import ChatSidebar from "@/app/components/user/chatbot/ChatSidebar";
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";

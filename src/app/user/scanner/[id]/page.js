@@ -1,11 +1,11 @@
 "use client";
 
-import ScannerSidebar from "@/app/components/scanner/ScannerSidebar";
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
+import ScannerSidebar from "@/app/components/user/scanner/ScannerSidebar";
 
 const Scanner = () => {
   const params = useParams();

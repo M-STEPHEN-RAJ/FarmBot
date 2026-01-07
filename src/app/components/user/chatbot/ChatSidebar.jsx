@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { gsap } from 'gsap';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { API } from '../../../app/utils/api.js'
+import { API } from '../../../utils/api.js'
 
 const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
 

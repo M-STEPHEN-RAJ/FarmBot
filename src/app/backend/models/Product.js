@@ -35,6 +35,11 @@ const reviewSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
+    sellerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Seller",
+      required: true,
+    },
     name: { type: String, required: true },
     description: String,
 
@@ -59,6 +64,13 @@ const productSchema = new mongoose.Schema(
     image: String,
 
     popularity: { type: Number, default: 0 },
+    soldCount: { type: Number, default: 0 },
+
+    status: {
+      type: String,
+      enum: ["review", "active", "blocked"],
+      default: "review",
+    },
   },
   { timestamps: true }
 );

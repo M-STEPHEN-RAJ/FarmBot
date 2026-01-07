@@ -2,7 +2,12 @@ import Product from "../models/Product.js";
 import User from "../models/User.js";
 
 // Add a new product
-export const createProduct = async (body) => {
+export const createProduct = async (body, seller) => {
+
+  if (!seller || seller.role !== "seller") {
+    throw new Error("Only sellers can add products!");
+  }
+
   const {
     name,
     description,
@@ -20,6 +25,7 @@ export const createProduct = async (body) => {
   }
 
   const newProduct = new Product({
+    sellerId: seller._id,
     name,
     description,
     category,
@@ -29,6 +35,8 @@ export const createProduct = async (body) => {
     stock: stock || 0,
     image,
     popularity: popularity || 0,
+    status: "review",
+    soldCount: 0,
   });
 
   const savedProduct = await newProduct.save();

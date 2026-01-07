@@ -3,7 +3,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { API } from "@/app/utils/api";
 import { toast } from "react-hot-toast";
-import ScannerSidebar from "@/app/components/scanner/ScannerSidebar";
+import ScannerSidebar from "@/app/components/user/scanner/ScannerSidebar";
 import Lottie from "lottie-react";
 import scannerAnimation from "../../../../public/lottie/scanner-animation.json";
 
