@@ -261,7 +261,11 @@ const ProductDetails = () => {
             </div>
             <div className="flex flex-col justify-center items-center gap-1.5">
               <div className="bg-gray-100 p-2 rounded-full">
-                <img className="w-6.5" src="/images/user/store/secure.png" alt="" />
+                <img
+                  className="w-6.5"
+                  src="/images/user/store/secure.png"
+                  alt=""
+                />
               </div>
               <p className="text-xs text-center">
                 Secure <br />
@@ -402,13 +406,20 @@ const ProductDetails = () => {
                     <div
                       className="h-4 bg-[#166831] rounded"
                       style={{
-                        width: `${(count / product.reviewCount) * 100}%`,
+                        width: `${
+                          product.reviewCount > 0
+                            ? (count / product.reviewCount) * 100
+                            : 0
+                        }%`,
                       }}
                     ></div>
                   </div>
 
                   <span className="w-13 text-xs font-medium text-[#166831]">
-                    {((count / product.reviewCount) * 100).toFixed(0)}%
+                    {product.reviewCount > 0
+                      ? ((count / product.reviewCount) * 100).toFixed(0)
+                      : 0}
+                    %
                   </span>
                 </div>
               ));

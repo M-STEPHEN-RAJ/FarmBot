@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import axios from "axios";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
 
 const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
@@ -80,7 +80,11 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
         <div className="flex justify-between items-center px-2">
           <h2 className="text-medium">Farm Doc</h2>
           <div className="p-1 hover:bg-gray-100 rounded-md cursor-pointer">
-            <img src="/images/user/chatbot/closepanel.svg" alt="" className="w-5" />
+            <img
+              src="/images/user/chatbot/closepanel.svg"
+              alt=""
+              className="w-5"
+            />
           </div>
         </div>
 
@@ -89,7 +93,11 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
             onClick={handleNewScan}
             className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer"
           >
-            <img src="/images/user/chatbot/newchat.png" alt="" className="w-5" />
+            <img
+              src="/images/user/chatbot/newchat.png"
+              alt=""
+              className="w-5"
+            />
             <p className="text-sm">New Scan</p>
           </div>
           <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
@@ -107,7 +115,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
             Array.from({ length: 10 }).map((_, index) => (
               <div
                 key={index}
-                className="px-2 py-2 flex justify-between items-center gap-3 rounded-md group animate-pulse"
+                className="px-2 py-2 flex justify-between items-center gap-3 rounded-md animate-pulse"
               >
                 <div className="w-50 h-4 bg-gray-200 rounded-sm"></div>
                 <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
@@ -117,11 +125,13 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
           {scans.map((scan, index) => (
             <div
               key={scan._id}
-              ref={(el) => scanRefs.current[index] = el}
+              ref={(el) => (scanRefs.current[index] = el)}
               onClick={() => {
                 router.push(`/user/scanner/${scan._id}`);
               }}
               className={`relative px-2 py-2 flex justify-between items-center gap-3 ${
+                openMenuId === scan._id ? "z-50" : "z-0"
+              } ${
                 selectedScanId === scan._id
                   ? "bg-[#eeeef1] hover:bg-gray-200"
                   : "hover:bg-gray-100"
@@ -149,7 +159,11 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                     onClick={() => setOpenMenuId(null)}
                     className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-gray-100 text-gray-600 rounded-b-md cursor-pointer"
                   >
-                    <img src="/images/user/chatbot/rename.png" className='h-4.5 w-4.5' alt="" />  
+                    <img
+                      src="/images/user/chatbot/rename.png"
+                      className="h-4.5 w-4.5"
+                      alt=""
+                    />
                     Rename
                   </div>
                   <div
@@ -159,7 +173,11 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                     }}
                     className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-red-50 text-red-600 rounded-t-md cursor-pointer"
                   >
-                    <img src="/images/user/chatbot/delete.png" className='h-4.5 w-4.5' alt="" />                    
+                    <img
+                      src="/images/user/chatbot/delete.png"
+                      className="h-4.5 w-4.5"
+                      alt=""
+                    />
                     Delete
                   </div>
                 </div>

@@ -155,21 +155,24 @@ const ChatBot = () => {
   };
 
   return (
-    <div className="w-full flex">
+    <div className="w-full flex h-screen overflow-hidden">
       <ChatSidebar selectedChatId={chatId} />
 
-      <div className="flex-1 flex justify-center items-center">
-        <div className="flex-1 flex flex-col h-screen max-w-[800px] mx-auto w-full">
-          <div className="flex-1 overflow-y-auto py-4 space-y-5">
+      {/* CHANGE 1: This container now handles the scrolling for the whole screen */}
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
+        {/* Centering Wrapper: This keeps your 800px design as it is */}
+        <div className="flex-1 flex flex-col max-w-[800px] mx-auto w-full px-4">
+          {/* CHANGE 2: Removed overflow-y-auto from here so it doesn't fight with the parent */}
+          <div className="flex-1 py-4 space-y-5">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
                 className={`w-fit px-5 py-2 rounded-xl wrap-break-word
-            ${
-              msg.sender === "user"
-                ? "bg-[#166831] text-white ml-auto max-w-[70%]"
-                : "bg-white text-gray-800"
-            }`}
+              ${
+                msg.sender === "user"
+                  ? "bg-[#166831] text-white ml-auto max-w-[70%]"
+                  : "bg-white text-gray-800"
+              }`}
                 dangerouslySetInnerHTML={{ __html: msg.text }}
               />
             ))}
@@ -180,7 +183,7 @@ const ChatBot = () => {
                   {Array.from({ length: 3 }).map((_, idx) => (
                     <div
                       key={idx}
-                      className="flex flex-col space-y-5 px-4 max-w-[800px] w-full mx-auto"
+                      className="flex flex-col space-y-5 w-full mx-auto"
                     >
                       <div className="ml-auto w-[50%] h-7 bg-green-300/50 rounded-xl animate-pulse"></div>
                       <div className="space-y-2">
@@ -196,13 +199,14 @@ const ChatBot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="mb-2 space-y-2">
+          {/* Your original Input Design preserved exactly */}
+          <div className="space-y-2 sticky bottom-0 bg-white pt-2">
             <div
               className={`w-full flex px-2 py-1 ${
                 text.length > 70
                   ? "flex-col items-end gap-3 py-2"
                   : "flex-row justify-between items-center gap-3"
-              } border border-gray-300 rounded-4xl`}
+              } border border-gray-300 rounded-4xl bg-white`}
             >
               <textarea
                 ref={textareaRef}
@@ -243,7 +247,7 @@ const ChatBot = () => {
                 </div>
               </div>
             </div>
-            <p className="text-xs text-center text-gray-500">
+            <p className="text-xs text-center text-gray-500 pb-2">
               FarmBot AI can make mistakes. Check important info.
             </p>
           </div>

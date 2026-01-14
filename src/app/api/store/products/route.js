@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/app/backend/config/db.js";
 import { getProducts, createProduct } from "@/app/backend/controllers/storeController.js";
+import { uploadImage } from "@/app/utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import Seller from "@/app/backend/models/Seller.js";
 
 export async function POST(req) {
   try {
     await connectDB();
-
-    const body = await req.json();
 
     const cookieHeader = req.headers.get("cookie") || "";
     const token = cookieHeader
@@ -21,10 +20,35 @@ export async function POST(req) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     const seller = await Seller.findById(decoded.id);
+
     if (!seller || seller.role !== "seller") {
       return NextResponse.json({ message: "Unauthorized!" }, { status: 401 });
+    }
+
+    const contentType = req.headers.get("content-type") || "";
+    let body = {};
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+
+      body = {
+        name: formData.get("name"),
+        description: formData.get("description"),
+        category: formData.get("category"),
+        type: formData.get("type"),
+        price: Number(formData.get("price")),
+        unit: formData.get("unit"),
+        stock: Number(formData.get("stock")) || 0,
+      };
+
+      const image = formData.get("image");
+
+      if (image && image.size > 0) {
+        const buffer = Buffer.from(await image.arrayBuffer());
+        const secureUrl = await uploadImage(buffer);
+        body.image = secureUrl;
+      }
     }
 
     const savedProduct = await createProduct(body, seller);
