@@ -9,7 +9,7 @@ import { API } from "@/app/utils/api";
 const DEFAULT_AVATAR =
   "https://res.cloudinary.com/dbqirapyz/image/upload/v1766351294/avatar_zrjmys.png";
 
-const EditAvatarModal = ({ currentAvatar, onClose, onSave }) => {
+const EditAvatarModal = ({ currentAvatar, onClose, onSave, mode = "user" }) => {
   const fileInputRef = useRef(null);
 
   const [imageSrc, setImageSrc] = useState(null);
@@ -18,6 +18,8 @@ const EditAvatarModal = ({ currentAvatar, onClose, onSave }) => {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  const apiPath = mode === "seller" ? "/seller/me" : "/me";
 
   const handleFileClick = () => fileInputRef.current.click();
 
@@ -57,17 +59,21 @@ const EditAvatarModal = ({ currentAvatar, onClose, onSave }) => {
       const formData = new FormData();
       formData.append("avatar", croppedBlob, "avatar.png");
 
-      const res = await axios.patch(`${API}/me`, formData, {
+      const res = await axios.patch(`${API}${apiPath}`, formData, {
         withCredentials: true,
       });
 
       toast.success("Avatar updated successfully!");
-      setPreview(res.data.user.avatar);
-      onSave(res.data.user.avatar);
+
+      const updatedAvatar =
+      mode === "seller" ? `${res.data.seller.avatar}?t=${new Date().getTime()}` : `${res.data.user.avatar}?t=${new Date().getTime()}`;
+
+      setPreview(updatedAvatar);
+      onSave(updatedAvatar);
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update avatar");
+      toast.error("Failed to update avatar!");
     } finally {
       setSaving(false);
     }
@@ -78,7 +84,7 @@ const EditAvatarModal = ({ currentAvatar, onClose, onSave }) => {
       setSaving(true);
 
       const res = await axios.patch(
-        `${API}/me`,
+        `${API}${apiPath}`,
         { avatar: DEFAULT_AVATAR },
         { withCredentials: true }
       );
@@ -141,7 +147,9 @@ const EditAvatarModal = ({ currentAvatar, onClose, onSave }) => {
               </button>
               <button
                 onClick={handleFileClick}
-                className="w-24 py-1.5 text-white font-medium bg-[#166831] rounded-md cursor-pointer"
+                className={`w-24 py-1.5 text-white font-medium ${
+                  mode === "seller" ? "bg-[#EB3D3F]" : "bg-[#166831]"
+                } rounded-md cursor-pointer`}
               >
                 Change
               </button>
@@ -157,7 +165,9 @@ const EditAvatarModal = ({ currentAvatar, onClose, onSave }) => {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-24 py-1.5 bg-[#166831] text-white rounded-md flex items-center justify-center cursor-pointer"
+                className={`w-24 py-1.5 ${
+                  mode === "seller" ? "bg-[#EB3D3F]" : "bg-[#166831]"
+                } text-white rounded-md flex items-center justify-center cursor-pointer`}
               >
                 {saving ? (
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

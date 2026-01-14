@@ -4,8 +4,13 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { API } from "@/app/utils/api";
 
-const EditNameModal = ({ currentName, email, onClose, onSave }) => {
-
+const EditNameModal = ({
+  currentName,
+  email,
+  onClose,
+  onSave,
+  mode = "user",
+}) => {
   const [name, setName] = useState(currentName);
   const [saving, setSaving] = useState(false);
 
@@ -17,14 +22,18 @@ const EditNameModal = ({ currentName, email, onClose, onSave }) => {
 
     try {
       setSaving(true);
+
       const formData = new FormData();
       formData.append("name", name);
 
-      const res = await axios.patch(`${API}/me`, formData, {
+      const apiPath = mode === "seller" ? "/seller/me" : "/me";
+
+      await axios.patch(`${API}${apiPath}`, formData, {
         withCredentials: true,
       });
+
       toast.success("Profile Updated successfully!");
-      onSave(res.data.user.name);
+      onSave(name);
       onClose();
     } catch (err) {
       console.error(err);
@@ -81,7 +90,7 @@ const EditNameModal = ({ currentName, email, onClose, onSave }) => {
         <div className="flex justify-end gap-3 text-sm">
           <button
             onClick={onClose}
-            className="w-22 py-1.5 text-[#166831] border border-[#166831] rounded-md cursor-pointer font-medium"
+            className={`w-22 py-1.5 border ${mode === "seller" ? "text-[#EB3D3F] border-[#EB3D3F]" : "text-[#166831] border-[#166831]"} rounded-md cursor-pointer font-medium`}
           >
             Cancel
           </button>
@@ -89,7 +98,7 @@ const EditNameModal = ({ currentName, email, onClose, onSave }) => {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-22 py-1.5 bg-[#166831] text-white rounded-md cursor-pointer disabled:opacity-60 flex items-center justify-center"
+            className={`w-22 py-1.5 ${mode === "seller" ? "bg-[#EB3D3F]" : "bg-[#166831]"} text-white rounded-md cursor-pointer disabled:opacity-60 flex items-center justify-center`}
           >
             {saving ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

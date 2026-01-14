@@ -37,7 +37,7 @@ const SellerLogin = () => {
       });
 
       if (res.status === 200) {
-        localStorage.setItem("session-change", Date.now());
+        localStorage.setItem("seller-session-change", Date.now());
         toast.success(res.data.message || "Login successful!");
         router.push("/seller/store");
       }
@@ -71,7 +71,7 @@ const SellerLogin = () => {
               <h2 className="text-2xl font-semibold">Welcome Back!</h2>
             </div>
 
-            <div className="space-y-5">
+            {/* <div className="space-y-5">
               <div className="flex justify-center items-center gap-5 rounded-md py-2.5 border border-gray-300 cursor-pointer">
                 <img
                   src="/images/seller/login/google.png"
@@ -85,9 +85,9 @@ const SellerLogin = () => {
                 <p>or</p>
                 <div className="w-full h-0.5 border-t border-gray-300"></div>
               </div>
-            </div>
+            </div> */}
 
-            <div className="space-y-5 -mt-3">
+            <div className="space-y-5 mt-12">
               <div className="flex flex-col gap-1.5">
                 <label
                   className="text-sm font-medium text-gray-500"

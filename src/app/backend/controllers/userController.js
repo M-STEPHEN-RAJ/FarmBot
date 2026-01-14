@@ -33,8 +33,8 @@ export const updateProfile = async (request) => {
 
       if (avatar && avatar.size > 0) {
         const buffer = Buffer.from(await avatar.arrayBuffer());
-        const upload = await uploadImage(buffer);
-        updates.avatar = upload.secure_url;
+        const secure_url = await uploadImage(buffer);
+        updates.avatar = secure_url;
       }
     } else if (contentType.includes("application/json")) {
       const body = await request.json();

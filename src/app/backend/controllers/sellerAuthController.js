@@ -77,8 +77,8 @@ export const loginSeller = async (req) => {
     // Set cookie
     const cookie = serialize("sellerToken", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: false,
+      sameSite: "lax",
       maxAge: 24 * 60 * 60,
       path: "/",
     });

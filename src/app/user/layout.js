@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import Sidebar from "../components/common/Sidebar";
-import SessionWatcher from "../providers/SessionWatcher";
+import UserSessionWatcher from "../providers/UserSessionWatcher";
 import Loading from "../components/common/Loading";
 
 const UserLayout = ({ children }) => {
@@ -30,7 +30,7 @@ const UserLayout = ({ children }) => {
   }, [pathname]);
 
   return (
-    <SessionWatcher>
+    <UserSessionWatcher>
       {loading && <Loading />}
       <div className="flex w-full min-h-screen">
         {!hideSidebar && (
@@ -41,7 +41,7 @@ const UserLayout = ({ children }) => {
 
         <main className="flex-1 flex justify-center">{children}</main>
       </div>
-    </SessionWatcher>
+    </UserSessionWatcher>
   );
 };
 
