@@ -2,10 +2,10 @@
 import React, { useState, useRef, useEffect } from "react";
 
 const StoreSidebar = ({ filters, setFilters }) => {
-
   const range = useRef(null);
   const sortDropdownRef = useRef(null);
   const typeDropdownRef = useRef(null);
+  const statusDropdownRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [min, setMin] = useState(0);
@@ -21,6 +21,9 @@ const StoreSidebar = ({ filters, setFilters }) => {
   const [inStock, setInStock] = useState(false);
   const [outOfStock, setOutOfStock] = useState(false);
   const [rating, setRating] = useState(0);
+  const [status, setStatus] = useState("active");
+  const [openStatus, setOpenStatus] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const categoryOptions = ["Seeds", "Fertilizers", "Tools"];
 
@@ -38,7 +41,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
   };
 
   const sortMap = {
-    "Relevance": "popularity",
+    Relevance: "popularity",
     "Price: Low → High": "price_low",
     "Price: High → Low": "price_high",
     "Newest First": "newest",
@@ -62,7 +65,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
     setSelectedSort(label);
     setFilters({ ...filters, sort: sortMap[label] });
   };
-  
+
   const handleRatingClick = (num) => {
     setRating(num);
     setFilters({ ...filters, rating: num });
@@ -86,6 +89,12 @@ const StoreSidebar = ({ filters, setFilters }) => {
   const handleMaxChange = (e) => {
     const value = Math.max(Number(e.target.value), tempMin + 1);
     setTempMax(value);
+  };
+
+  const handleStatusSelect = (status) => {
+    setSelectedStatus(status);
+    setOpenStatus(false);
+    setFilters({ ...filters, status });
   };
 
   const applyPriceFilter = () => {
@@ -120,7 +129,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setFilters(prev => ({ ...prev, search: searchTerm }));
+      setFilters((prev) => ({ ...prev, search: searchTerm }));
     }, 500);
 
     return () => clearTimeout(timeout);
@@ -149,18 +158,28 @@ const StoreSidebar = ({ filters, setFilters }) => {
       ) {
         setOpenType(false);
       }
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(e.target)
+      ) {
+        setOpenStatus(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <div className="w-[280px] h-screen overflow-y-auto space-y-4 py-4 border-r border-gray-300">
+    <div className="w-[280px] h-screen overflow-y-auto space-y-4 pb-5 border-r border-gray-300">
       <div className="sticky top-0 space-y-4 bg-white pb-3 z-10">
-        <div className="flex justify-between items-center px-2">
+        <div className="flex justify-between items-center px-2 pt-4">
           <h2 className="text-medium">Farm Store</h2>
           <div className="p-1 hover:bg-gray-100 rounded-md cursor-pointer">
-            <img src="/images/user/chatbot/closepanel.svg" alt="" className="w-5" />
+            <img
+              src="/images/user/chatbot/closepanel.svg"
+              alt=""
+              className="w-5"
+            />
           </div>
         </div>
 
@@ -202,7 +221,9 @@ const StoreSidebar = ({ filters, setFilters }) => {
 
       {/* Type */}
       <div className="px-2 mt-5">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">{selectedCategory} Type</h3>
+        <h3 className="text-sm font-medium text-gray-700 mb-3">
+          {selectedCategory} Type
+        </h3>
 
         <div ref={typeDropdownRef} className="relative">
           <button
@@ -234,6 +255,47 @@ const StoreSidebar = ({ filters, setFilters }) => {
                   className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   {opt}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="px-2 mt-5">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">Status</h3>
+
+        <div ref={statusDropdownRef} className="relative">
+          <button
+            onClick={() => setOpenStatus(!openStatus)}
+            className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm flex justify-between items-center cursor-pointer capitalize"
+          >
+            {selectedStatus || "All"}
+            <img
+              src="/images/user/store/dropdown.png"
+              alt=""
+              className={`w-4 transition-all duration-200 ${
+                openStatus ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {openStatus && (
+            <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-md text-sm z-10">
+              <div
+                onClick={() => handleStatusSelect("")}
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                All
+              </div>
+              {["active", "review", "blocked"].map((s) => (
+                <div
+                  key={s}
+                  onClick={() => handleStatusSelect(s)}
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                >
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
                 </div>
               ))}
             </div>
@@ -297,7 +359,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
             />
           </div>
 
-          <button 
+          <button
             onClick={applyPriceFilter}
             className="px-4 py-1 text-sm border rounded-full hover:bg-gray-100 cursor-pointer"
           >

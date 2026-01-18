@@ -25,6 +25,7 @@ const Store = () => {
     inStock: false,
     outOfStock: false,
     sort: "popularity",
+    status: "active",
   });
 
   useEffect(() => {

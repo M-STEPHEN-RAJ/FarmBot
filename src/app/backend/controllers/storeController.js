@@ -54,10 +54,16 @@ export const getProducts = async (query) => {
     search,
     inStock,
     outOfStock,
-    rating
+    rating,
+    status
   } = query;
 
   const filter = {};
+
+  // Status
+  if (query.status) {
+    filter.status = query.status;
+  }
 
   // Category
   if (category) filter.category = category;

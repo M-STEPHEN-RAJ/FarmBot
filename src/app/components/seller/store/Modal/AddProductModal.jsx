@@ -170,7 +170,7 @@ const AddProductModal = ({ onClose }) => {
                 </button>
 
                 {openCategory && (
-                  <div className="absolute top-full mt-1 w-full bg-white border rounded-md shadow z-20">
+                  <div className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-md shadow z-20">
                     {categoryOptions.map((cat) => (
                       <div
                         key={cat}
@@ -178,7 +178,7 @@ const AddProductModal = ({ onClose }) => {
                           setForm({ ...form, category: cat, type: "" });
                           setOpenCategory(false);
                         }}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
                       >
                         {cat}
                       </div>
@@ -206,7 +206,7 @@ const AddProductModal = ({ onClose }) => {
                 </button>
 
                 {openType && (
-                  <div className="absolute top-full mt-1 w-full bg-white border rounded-md shadow z-20">
+                  <div className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-md shadow z-20">
                     {getTypeOptions(form.category).map((type) => (
                       <div
                         key={type}
@@ -214,7 +214,7 @@ const AddProductModal = ({ onClose }) => {
                           setForm({ ...form, type });
                           setOpenType(false);
                         }}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        className="px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
                       >
                         {type}
                       </div>
