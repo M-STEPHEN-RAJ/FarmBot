@@ -21,7 +21,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
   const [inStock, setInStock] = useState(false);
   const [outOfStock, setOutOfStock] = useState(false);
   const [rating, setRating] = useState(0);
-  const [status, setStatus] = useState("active");
+  const [status, setStatus] = useState("");
   const [openStatus, setOpenStatus] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
 
@@ -51,7 +51,12 @@ const StoreSidebar = ({ filters, setFilters }) => {
   // Handlers
   const handleCategoryClick = (cat) => {
     setSelectedCategory(cat);
-    setFilters({ ...filters, category: cat });
+    setSelectedType("");
+    setFilters({
+      ...filters,
+      category: cat,
+      type: "",
+    });
   };
 
   const handleTypeSelect = (type) => {
@@ -108,9 +113,14 @@ const StoreSidebar = ({ filters, setFilters }) => {
   const handleReset = () => {
     setMin(0);
     setMax(5000);
+    setTempMin(0);
+    setTempMax(5000);
+    setSearchTerm("");
     setSelectedCategory("Seeds");
     setSelectedType("");
     setSelectedSort("Relevance");
+    setStatus("");
+    setSelectedStatus("");
     setRating(0);
     setInStock(false);
     setOutOfStock(false);
@@ -118,6 +128,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
       search: "",
       category: "Seeds",
       type: "",
+      status: "",
       minPrice: 0,
       maxPrice: 5000,
       sort: "popularity",
@@ -188,6 +199,7 @@ const StoreSidebar = ({ filters, setFilters }) => {
           <div className="flex justify-between items-center border border-gray-300 rounded-full pl-3 pr-2 py-1.5">
             <input
               type="text"
+              value={searchTerm}
               className="w-full text-sm outline-none"
               placeholder={`search for ${selectedCategory}`}
               onChange={(e) => setSearchTerm(e.target.value)}
