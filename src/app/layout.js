@@ -10,7 +10,7 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "FramBot",
+  title: "FarmBot",
   description: "AI Enhanced Farming Application",
 };
 

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 import { gsap } from "gsap";
 import axios from "axios";
 import { API } from "@/app/utils/api";
@@ -9,11 +10,71 @@ const Cart = () => {
   const itemRefs = useRef({});
   const hasAnimated = useRef(false);
 
+  const [user, setUser] = useState(null);
   const [selectedItems, setSelectedItems] = useState(new Set());
+  const [shippingAddress, setShippingAddress] = useState({
+    name: "",
+    phone: "",
+    addressLine: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+  const [paymentMethod, setPaymentMethod] = useState("COD");
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch cart from API
+  const stripePromise = loadStripe(
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  );
+
+  const fetchProfile = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}/me`, {
+        withCredentials: true,
+      });
+
+      setUser(res.data.user);
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.defaultShippingAddress) {
+      setShippingAddress({ ...user.defaultShippingAddress });
+    }
+  }, [user]);
+
+  const handleCheckout = async () => {
+    if (selectedTotalPrice === 0) {
+      toast.error("Select items first!");
+      return;
+    }
+
+    if (!shippingAddress.name || !shippingAddress.phone) {
+      toast.error("Enter a valid shipping address!");
+      return;
+    }
+
+    const res = await axios.post("/api/order/checkout", {
+      selectedItemIds: Array.from(selectedItems).map((id) => id.toString()),
+      shippingAddress,
+      paymentMethod,
+    });
+
+    if (paymentMethod === "CARD") {
+      window.location.href = res.data.url;
+    } else {
+      toast.success("Order placed successfully!");
+      fetchCart();
+    }
+  };
+
   const fetchCart = async () => {
     setLoading(true);
     try {
@@ -36,7 +97,7 @@ const Cart = () => {
           action: "update",
           quantity: item.quantity + 1,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       setCart(res.data.cart);
@@ -62,7 +123,7 @@ const Cart = () => {
             const res = await axios.patch(
               `${API}/cart`,
               { productId: item.productId, action: "remove" },
-              { withCredentials: true }
+              { withCredentials: true },
             );
             setCart(res.data.cart);
           } catch (err) {
@@ -79,7 +140,7 @@ const Cart = () => {
             action: "update",
             quantity: item.quantity - 1,
           },
-          { withCredentials: true }
+          { withCredentials: true },
         );
         setCart(res.data.cart);
       } catch (err) {
@@ -91,23 +152,24 @@ const Cart = () => {
   const toggleItem = (itemId) => {
     setSelectedItems((prev) => {
       const updated = new Set(prev);
-      updated.has(itemId) ? updated.delete(itemId) : updated.add(itemId);
+      const idStr = itemId.toString();
+      updated.has(idStr) ? updated.delete(idStr) : updated.add(idStr);
       return updated;
     });
   };
 
   const selectedCartItems = cart?.items
-    ? cart.items.filter((item) => selectedItems.has(item._id))
+    ? cart.items.filter((item) => selectedItems.has(item._id.toString()))
     : [];
 
   const selectedTotalItems = selectedCartItems.reduce(
     (sum, item) => sum + item.quantity,
-    0
+    0,
   );
 
   const selectedTotalPrice = selectedCartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   useEffect(() => {
@@ -133,6 +195,10 @@ const Cart = () => {
     hasAnimated.current = true;
   }, [cart]);
 
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
   if (loading) {
     return <p>Loading</p>;
   }
@@ -147,7 +213,7 @@ const Cart = () => {
 
   return (
     <div className="w-full max-w-[1150px] flex flex-col pr-4 py-4">
-      <div className="w-full grid grid-cols-[3fr_1fr] gap-6 mt-3">
+      <div className="w-full grid grid-cols-[2.5fr_1fr] gap-12 mt-3">
         <div className="space-y-5">
           <h2 className="text-lg font-medium">Shopping Cart</h2>
 
@@ -239,8 +305,76 @@ const Cart = () => {
             </div>
           </div>
         </div>
-        <div className="h-fit sticky top-12 space-y-5 border border-gray-300 rounded-md p-4 mt-5">
-          <div className="font-medium flex justify-between items-start gap-3">
+        <div className="h-fit sticky top-12 space-y-3 border border-gray-300 rounded-md p-4 mt-5">
+          <h2 className="font-semibold border-b border-b-gray-300">
+            Payment Method
+          </h2>
+          <div className="flex gap-3 cursor-pointer w-fit">
+            <input
+              id="cod"
+              type="radio"
+              name="payment"
+              value="COD"
+              checked={paymentMethod === "COD"}
+              onChange={() => setPaymentMethod("COD")}
+              className="accent-[#166831] cursor-pointer"
+            />
+            <label
+              htmlFor="cod"
+              className="text-sm font-medium text-gray-700 cursor-pointer"
+            >
+              Cash on Delivery
+            </label>
+          </div>
+
+          <div className="flex gap-3 cursor-pointer w-fit">
+            <input
+              id="payOnline"
+              type="radio"
+              name="payment"
+              value="CARD"
+              checked={paymentMethod === "CARD"}
+              onChange={() => setPaymentMethod("CARD")}
+              className="accent-[#166831] cursor-pointer"
+            />
+            <label
+              htmlFor="payOnline"
+              className="text-sm font-medium text-gray-700 cursor-pointer"
+            >
+              Pay Online
+            </label>
+          </div>
+
+          <h2 className="font-semibold border-b border-b-gray-300 mt-5">
+            Delivery Address
+          </h2>
+
+          {user?.defaultShippingAddress ? (
+            <div>
+              <p>{user.defaultShippingAddress.name}</p>
+              <p className="text-sm text-gray-600 font-medium">
+                {user.defaultShippingAddress.addressLine}
+              </p>
+              <p className="text-sm text-gray-600 font-medium">
+                {user.defaultShippingAddress.city},{" "}
+                {user.defaultShippingAddress.state} -{" "}
+                {user.defaultShippingAddress.pincode}
+              </p>
+              <p className="text-sm font-medium text-gray-600">
+                {user.defaultShippingAddress.phone}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-red-600 mt-2">
+              No default shipping address found. Please add one in your profile.
+            </p>
+          )}
+
+          <h2 className="font-semibold border-b border-b-gray-300 mt-5">
+            Payment Details
+          </h2>
+
+          <div className="font-medium flex justify-between items-start">
             <span className="mt-1 text-sm">
               Subtotal ({selectedTotalItems} items):
             </span>
@@ -257,7 +391,23 @@ const Cart = () => {
               <p className="text-sm text-gray-600 font-medium">+ ₹ 40.00</p>
             )}
           </div>
-          <button className="w-full text-white bg-[#166831] rounded-md py-1 px-4 cursor-pointer">
+          <div className="flex justify-between">
+            <p className="font-semibold text-lg">Order Total</p>
+            <p className="font-semibold text-lg">
+              ₹
+              {selectedTotalPrice > 0
+                ? selectedTotalPrice < 499
+                  ? selectedTotalPrice + 40
+                  : selectedTotalPrice
+                : 0}
+              .00
+            </p>
+          </div>
+
+          <button
+            onClick={handleCheckout}
+            className="w-full text-white bg-[#166831] rounded-md py-1 px-4 cursor-pointer mt-3"
+          >
             Proceed to Buy
           </button>
         </div>

@@ -67,6 +67,11 @@ const orderSchema = new mongoose.Schema(
     totalItems: Number,
     totalPrice: Number,
 
+    deliveryFee: {
+      type: Number,
+      default: 0,
+    },
+
     payment: {
       method: {
         type: String,
@@ -98,3 +103,6 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
+export default Order;
