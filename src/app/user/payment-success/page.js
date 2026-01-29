@@ -1,66 +1,36 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Lottie from "lottie-react";
+import orderAnimation from "../../../../public/lottie/order-animation.json";
 
 export default function Success() {
-  const [order, setOrder] = useState(null);
 
-  useEffect(() => {
-    // Sample order data for testing
-    const sampleOrder = {
-      totalItems: 3,
-      totalPrice: 550,
-      deliveryFee: 40,
-      shippingAddress: {
-        name: "John Doe",
-        phone: "9876543210",
-        addressLine: "123 Main Street",
-        city: "Chennai",
-        state: "Tamil Nadu",
-        pincode: "600001",
-      },
-      items: [
-        { productId: "1", name: "Tomato", price: 50, quantity: 2, unit: "kg" },
-        { productId: "2", name: "Potato", price: 100, quantity: 1, unit: "kg" },
-      ],
-      payment: { method: "CARD", status: "paid" },
-    };
+  const router = useRouter();
 
-    setOrder(sampleOrder);
-  }, []);
-
-  if (!order) return <p>Loading...</p>;
+  const handleDone = () => {
+    router.push("/user/order");
+  };
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold text-green-600">Payment Successful!</h1>
-      <p className="mt-2">Your order has been placed successfully.</p>
-
-      <h2 className="mt-4 font-semibold text-lg">Order Summary</h2>
-      <p>Total Items: {order.totalItems}</p>
-      <p>Total Price: ₹{order.totalPrice}</p>
-      {order.deliveryFee && <p>Delivery Fee: ₹{order.deliveryFee}</p>}
-
-      <h2 className="mt-4 font-semibold text-lg">Shipping Address</h2>
-      <p>{order.shippingAddress.name}</p>
-      <p>{order.shippingAddress.phone}</p>
-      <p>{order.shippingAddress.addressLine}</p>
-      <p>
-        {order.shippingAddress.city}, {order.shippingAddress.state} -{" "}
-        {order.shippingAddress.pincode}
-      </p>
-
-      <h2 className="mt-4 font-semibold text-lg">Ordered Items</h2>
-      <ul className="list-disc pl-5">
-        {order.items.map((item) => (
-          <li key={item.productId}>
-            {item.name} - ₹{item.price} x {item.quantity} ({item.unit})
-          </li>
-        ))}
-      </ul>
-
-      <p className="mt-4 font-medium text-gray-700">
-        Payment Method: {order.payment.method} ({order.payment.status})
-      </p>
+    <div className="flex flex-col items-center justify-center h-screen px-4">
+      <Lottie
+        className="w-64 h-64 mx-auto"
+        animationData={orderAnimation}
+        loop={false}
+      />
+      <div className="space-y-2 -mt-10">
+        <h1 className="text-2xl text-center font-semibold text-green-600">
+          Payment Successful!
+        </h1>
+        <p className="text-center text-gray-500">
+          Your order has been placed successfully.
+        </p>
+      </div>
+      <div className="flex gap-10 mt-10">
+        <button className="w-32 border border-[#166831] text-[#166831] rounded-md px-4 py-1 font-medium cursor-pointer">Download</button>
+        <button onClick={handleDone} className="w-32 text-white bg-[#166831] rounded-md px-4 py-1 font-medium cursor-pointer">Done</button>        
+      </div>
     </div>
   );
 }

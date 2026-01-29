@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import { gsap } from "gsap";
 import axios from "axios";
@@ -9,6 +10,7 @@ import toast from "react-hot-toast";
 const Cart = () => {
   const itemRefs = useRef({});
   const hasAnimated = useRef(false);
+  const router = useRouter();
 
   const [user, setUser] = useState(null);
   const [selectedItems, setSelectedItems] = useState(new Set());
@@ -61,17 +63,41 @@ const Cart = () => {
       return;
     }
 
-    const res = await axios.post("/api/order/checkout", {
-      selectedItemIds: Array.from(selectedItems).map((id) => id.toString()),
-      shippingAddress,
-      paymentMethod,
-    });
+    try {
+      if (paymentMethod === "COD") {
+        const res = await axios.post(
+          "/api/order",
+          {
+            selectedItemIds: Array.from(selectedItems).map((id) =>
+              id.toString(),
+            ),
+            shippingAddress,
+            paymentMethod,
+          },
+          { withCredentials: true },
+        );
 
-    if (paymentMethod === "CARD") {
-      window.location.href = res.data.url;
-    } else {
-      toast.success("Order placed successfully!");
-      fetchCart();
+        toast.success("Order placed successfully!");
+        router.push("/user/order");
+        fetchCart();
+      } else {
+        const res = await axios.post(
+          "/api/order/checkout",
+          {
+            selectedItemIds: Array.from(selectedItems).map((id) =>
+              id.toString(),
+            ),
+            shippingAddress,
+            paymentMethod,
+          },
+          { withCredentials: true },
+        );
+
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.error || "Something went wrong!");
     }
   };
 
@@ -205,8 +231,23 @@ const Cart = () => {
 
   if (!cart || !cart.items.length) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-gray-500">Your cart is empty.</p>
+      <div className="w-full max-w-[1150px] flex flex-col items-center justify-center gap-8 py-24 text-gray-500">
+        <div className="flex flex-col items-center justify-center">
+          <img src="/images/user/cart/empty-cart.png" alt="" className="w-40" />
+          <div className="text-center">
+            <p className="text-lg font-medium">Your cart is empty</p>
+            <p className="text-sm mt-2">
+              Looks like you haven’t added anything to your cart yet.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => router.push("/user/store")}
+          className="px-6 py-1.5 bg-[#166831] text-white rounded-md cursor-pointer"
+        >
+          Start Shopping
+        </button>
       </div>
     );
   }
@@ -350,27 +391,32 @@ const Cart = () => {
           </h2>
 
           {user?.defaultShippingAddress ? (
-            <div>
-              <p>{user.defaultShippingAddress.name}</p>
-              <p className="text-sm text-gray-600 font-medium">
-                {user.defaultShippingAddress.addressLine}
-              </p>
-              <p className="text-sm text-gray-600 font-medium">
-                {user.defaultShippingAddress.city},{" "}
-                {user.defaultShippingAddress.state} -{" "}
-                {user.defaultShippingAddress.pincode}
-              </p>
-              <p className="text-sm font-medium text-gray-600">
-                {user.defaultShippingAddress.phone}
-              </p>
-            </div>
+            <>
+              <div>
+                <p>{user.defaultShippingAddress.name}</p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {user.defaultShippingAddress.addressLine}
+                </p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {user.defaultShippingAddress.city},{" "}
+                  {user.defaultShippingAddress.state} -{" "}
+                  {user.defaultShippingAddress.pincode}
+                </p>
+                <p className="text-sm font-medium text-gray-600">
+                  {user.defaultShippingAddress.phone}
+                </p>
+              </div>
+              <button className="border border-[#166831] text-[#166831] text-sm rounded-md px-4 py-0.5 font-medium cursor-pointer">
+                Change Address
+              </button>
+            </>
           ) : (
             <p className="text-sm text-red-600 mt-2">
               No default shipping address found. Please add one in your profile.
             </p>
           )}
 
-          <h2 className="font-semibold border-b border-b-gray-300 mt-5">
+          <h2 className="font-semibold border-b border-b-gray-300 mt-2">
             Payment Details
           </h2>
 

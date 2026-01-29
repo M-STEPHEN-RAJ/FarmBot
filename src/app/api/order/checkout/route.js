@@ -10,7 +10,6 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    // Extract JWT from cookie
     const cookieHeader = req.headers.get("cookie") || "";
     const token = cookieHeader
       .split(";")
