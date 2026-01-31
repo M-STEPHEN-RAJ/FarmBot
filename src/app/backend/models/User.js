@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema(
     password: { type: String },
     provider: { type: String, default: "credentials" },
     avatar: { type: String, default: "" },
+    preferredLanguage: {
+      type: String,
+      enum: ["en", "ta"],
+      default: "en",
+    },
     defaultShippingAddress: {
       type: addressSchema,
       default: null,

@@ -28,8 +28,13 @@ export const updateProfile = async (request) => {
       const formData = await request.formData();
       const name = formData.get("name");
       const avatar = formData.get("avatar");
+      const preferredLanguage = formData.get("preferredLanguage");
 
       if (name) updates.name = name;
+
+      if (preferredLanguage && ["en", "ta"].includes(preferredLanguage)) {
+        updates.preferredLanguage = preferredLanguage;
+      }
 
       if (avatar && avatar.size > 0) {
         const buffer = Buffer.from(await avatar.arrayBuffer());
@@ -40,6 +45,10 @@ export const updateProfile = async (request) => {
       const body = await request.json();
       if (body.name) updates.name = body.name;
       if (body.avatar) updates.avatar = body.avatar;
+
+      if (body.preferredLanguage && ["en", "ta"].includes(body.preferredLanguage)) {
+        updates.preferredLanguage = body.preferredLanguage;
+      }
     }
 
     if (Object.keys(updates).length === 0) {

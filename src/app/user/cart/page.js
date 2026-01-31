@@ -6,12 +6,14 @@ import { gsap } from "gsap";
 import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
+import AddressModal from "@/app/components/user/cart/Modal/AddressModal";
 
 const Cart = () => {
   const itemRefs = useRef({});
   const hasAnimated = useRef(false);
   const router = useRouter();
 
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [shippingAddress, setShippingAddress] = useState({
@@ -253,212 +255,233 @@ const Cart = () => {
   }
 
   return (
-    <div className="w-full max-w-[1150px] flex flex-col pr-4 py-4">
-      <div className="w-full grid grid-cols-[2.5fr_1fr] gap-12 mt-3">
-        <div className="space-y-5">
-          <h2 className="text-lg font-medium">Shopping Cart</h2>
+    <>
+      <div className="w-full max-w-[1150px] flex flex-col pr-4 py-4">
+        <div className="w-full grid grid-cols-[2.5fr_1fr] gap-12 mt-3">
+          <div className="space-y-5">
+            <h2 className="text-lg font-medium">Shopping Cart</h2>
 
-          {cart.items.map((item) => (
-            <div
-              key={item._id}
-              ref={(el) => (itemRefs.current[item._id] = el)}
-              className="w-full grid grid-cols-[0.5fr_1fr_2fr_1fr] gap-3 border-b border-gray-300 pb-3"
-            >
-              <div className="flex justify-center items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.has(item._id)}
-                  onChange={() => toggleItem(item._id)}
-                  className="accent-[#166831] w-4 h-4 cursor-pointer p-1"
-                />
-              </div>
-              <div className="">
-                <img className="w-35" src={item.image} alt="" />
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="">
-                  <h2 className="text-lg font-medium">{item.name}</h2>
-                  <p className="text-sm text-gray-500 font-medium">
-                    {item.category} - {item.type}
-                  </p>
+            {cart.items.map((item) => (
+              <div
+                key={item._id}
+                ref={(el) => (itemRefs.current[item._id] = el)}
+                className="w-full grid grid-cols-[0.5fr_1fr_2fr_1fr] gap-3 border-b border-gray-300 pb-3"
+              >
+                <div className="flex justify-center items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.has(item._id)}
+                    onChange={() => toggleItem(item._id)}
+                    className="accent-[#166831] w-4 h-4 cursor-pointer p-1"
+                  />
                 </div>
-                <p
-                  className={`font-medium ${
-                    item.stock > 0 ? "text-[#166831]" : "text-red-600"
-                  }`}
-                >
-                  {item.stock > 0 ? "Instock" : "Out of Stock"}
-                </p>
+                <div className="">
+                  <img className="w-35" src={item.image} alt="" />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="">
+                    <h2 className="text-lg font-medium">{item.name}</h2>
+                    <p className="text-sm text-gray-500 font-medium">
+                      {item.category} - {item.type}
+                    </p>
+                  </div>
+                  <p
+                    className={`font-medium ${
+                      item.stock > 0 ? "text-[#166831]" : "text-red-600"
+                    }`}
+                  >
+                    {item.stock > 0 ? "Instock" : "Out of Stock"}
+                  </p>
 
-                <div className="w-[100px] flex justify-between items-center px-4 py-1 border border-gray-300 rounded-md">
-                  {item.quantity > 1 ? (
+                  <div className="w-[100px] flex justify-between items-center px-4 py-1 border border-gray-300 rounded-md">
+                    {item.quantity > 1 ? (
+                      <div
+                        onClick={() => decrementQty(item)}
+                        className="text-xl cursor-pointer select-none"
+                      >
+                        -
+                      </div>
+                    ) : (
+                      <img
+                        className="w-4 cursor-pointer"
+                        src="/images/user/cart/delete.png"
+                        alt=""
+                        onClick={() => decrementQty(item)}
+                      />
+                    )}
+                    <p>{item.quantity}</p>
                     <div
-                      onClick={() => decrementQty(item)}
+                      onClick={() => incrementQty(item)}
                       className="text-xl cursor-pointer select-none"
                     >
-                      -
+                      +
                     </div>
-                  ) : (
-                    <img
-                      className="w-4 cursor-pointer"
-                      src="/images/user/cart/delete.png"
-                      alt=""
-                      onClick={() => decrementQty(item)}
-                    />
-                  )}
-                  <p>{item.quantity}</p>
-                  <div
-                    onClick={() => incrementQty(item)}
-                    className="text-xl cursor-pointer select-none"
-                  >
-                    +
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="flex gap-2">
-                  <p className="text-red-600 mt-1">-10%</p>
-                  <p className="text-xl font-medium flex items-start gap-1">
-                    <span className="text-sm font-normal mt-[1.8px]">₹</span>
-                    {item.price}.00
-                    <span className="text-gray-600 text-sm mt-[5px]">
-                      /{item.unit}
+                <div className="flex flex-col items-end">
+                  <div className="flex gap-2">
+                    <p className="text-red-600 mt-1">-10%</p>
+                    <p className="text-xl font-medium flex items-start gap-1">
+                      <span className="text-sm font-normal mt-[1.8px]">₹</span>
+                      {item.price}.00
+                      <span className="text-gray-600 text-sm mt-[5px]">
+                        /{item.unit}
+                      </span>
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-500 font-medium">
+                    M.R.P:{" "}
+                    <span className="line-through">
+                      ₹{Math.round(item.price / (1 - 10 / 100))}.00
                     </span>
                   </p>
+
+                  <p className="text-sm mt-3">Inclusive of all taxes</p>
                 </div>
-                <p className="text-sm text-gray-500 font-medium">
-                  M.R.P:{" "}
-                  <span className="line-through">
-                    ₹{Math.round(item.price / (1 - 10 / 100))}.00
-                  </span>
-                </p>
+              </div>
+            ))}
 
-                <p className="text-sm mt-3">Inclusive of all taxes</p>
+            <div className="text-end font-medium flex justify-end items-start gap-3">
+              <span className="mt-1">{`Subtotal (${cart.totalItems} items):`}</span>
+              <div className="flex gap-1">
+                <span className="text-sm mt-[1.8px]">₹</span>
+                <span className="text-2xl">{cart.totalPrice}.00</span>
               </div>
             </div>
-          ))}
-
-          <div className="text-end font-medium flex justify-end items-start gap-3">
-            <span className="mt-1">{`Subtotal (${cart.totalItems} items):`}</span>
-            <div className="flex gap-1">
-              <span className="text-sm mt-[1.8px]">₹</span>
-              <span className="text-2xl">{cart.totalPrice}.00</span>
+          </div>
+          <div className="h-fit sticky top-12 space-y-3 border border-gray-300 rounded-md p-4 mt-5">
+            <h2 className="font-semibold border-b border-b-gray-300">
+              Payment Method
+            </h2>
+            <div className="flex gap-3 cursor-pointer w-fit">
+              <input
+                id="cod"
+                type="radio"
+                name="payment"
+                value="COD"
+                checked={paymentMethod === "COD"}
+                onChange={() => setPaymentMethod("COD")}
+                className="accent-[#166831] cursor-pointer"
+              />
+              <label
+                htmlFor="cod"
+                className="text-sm font-medium text-gray-700 cursor-pointer"
+              >
+                Cash on Delivery
+              </label>
             </div>
-          </div>
-        </div>
-        <div className="h-fit sticky top-12 space-y-3 border border-gray-300 rounded-md p-4 mt-5">
-          <h2 className="font-semibold border-b border-b-gray-300">
-            Payment Method
-          </h2>
-          <div className="flex gap-3 cursor-pointer w-fit">
-            <input
-              id="cod"
-              type="radio"
-              name="payment"
-              value="COD"
-              checked={paymentMethod === "COD"}
-              onChange={() => setPaymentMethod("COD")}
-              className="accent-[#166831] cursor-pointer"
-            />
-            <label
-              htmlFor="cod"
-              className="text-sm font-medium text-gray-700 cursor-pointer"
-            >
-              Cash on Delivery
-            </label>
-          </div>
 
-          <div className="flex gap-3 cursor-pointer w-fit">
-            <input
-              id="payOnline"
-              type="radio"
-              name="payment"
-              value="CARD"
-              checked={paymentMethod === "CARD"}
-              onChange={() => setPaymentMethod("CARD")}
-              className="accent-[#166831] cursor-pointer"
-            />
-            <label
-              htmlFor="payOnline"
-              className="text-sm font-medium text-gray-700 cursor-pointer"
-            >
-              Pay Online
-            </label>
-          </div>
-
-          <h2 className="font-semibold border-b border-b-gray-300 mt-5">
-            Delivery Address
-          </h2>
-
-          {user?.defaultShippingAddress ? (
-            <>
-              <div>
-                <p>{user.defaultShippingAddress.name}</p>
-                <p className="text-sm text-gray-600 font-medium">
-                  {user.defaultShippingAddress.addressLine}
-                </p>
-                <p className="text-sm text-gray-600 font-medium">
-                  {user.defaultShippingAddress.city},{" "}
-                  {user.defaultShippingAddress.state} -{" "}
-                  {user.defaultShippingAddress.pincode}
-                </p>
-                <p className="text-sm font-medium text-gray-600">
-                  {user.defaultShippingAddress.phone}
-                </p>
-              </div>
-              <button className="border border-[#166831] text-[#166831] text-sm rounded-md px-4 py-0.5 font-medium cursor-pointer">
-                Change Address
-              </button>
-            </>
-          ) : (
-            <p className="text-sm text-red-600 mt-2">
-              No default shipping address found. Please add one in your profile.
-            </p>
-          )}
-
-          <h2 className="font-semibold border-b border-b-gray-300 mt-2">
-            Payment Details
-          </h2>
-
-          <div className="font-medium flex justify-between items-start">
-            <span className="mt-1 text-sm">
-              Subtotal ({selectedTotalItems} items):
-            </span>
-            <div className="flex gap-1">
-              <span className="text-sm mt-[1.8px]">₹</span>
-              <span className="text-xl">{selectedTotalPrice}.00</span>
+            <div className="flex gap-3 cursor-pointer w-fit">
+              <input
+                id="payOnline"
+                type="radio"
+                name="payment"
+                value="CARD"
+                checked={paymentMethod === "CARD"}
+                onChange={() => setPaymentMethod("CARD")}
+                className="accent-[#166831] cursor-pointer"
+              />
+              <label
+                htmlFor="payOnline"
+                className="text-sm font-medium text-gray-700 cursor-pointer"
+              >
+                Pay Online
+              </label>
             </div>
-          </div>
-          <div className="flex justify-between">
-            <p className="text-gray-700 text-sm">Delivery Fee</p>
-            {selectedTotalPrice >= 499 ? (
-              <p className="text-sm text-gray-600 font-medium">₹ 0.00</p>
+
+            <h2 className="font-semibold border-b border-b-gray-300 mt-5">
+              Delivery Address
+            </h2>
+
+            {user?.defaultShippingAddress ? (
+              <>
+                <div>
+                  <p>{user.defaultShippingAddress.name}</p>
+                  <p className="text-sm text-gray-600 font-medium">
+                    {user.defaultShippingAddress.addressLine}
+                  </p>
+                  <p className="text-sm text-gray-600 font-medium">
+                    {user.defaultShippingAddress.city},{" "}
+                    {user.defaultShippingAddress.state} -{" "}
+                    {user.defaultShippingAddress.pincode}
+                  </p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {user.defaultShippingAddress.phone}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsAddressModalOpen(true)}
+                  className="border border-[#166831] text-[#166831] text-sm rounded-md px-4 py-0.5 font-medium cursor-pointer"
+                >
+                  Change Address
+                </button>
+              </>
             ) : (
-              <p className="text-sm text-gray-600 font-medium">+ ₹ 40.00</p>
+              <p className="text-sm text-red-600 mt-2">
+                No default shipping address found. Please add one in your
+                profile.
+              </p>
             )}
-          </div>
-          <div className="flex justify-between">
-            <p className="font-semibold text-lg">Order Total</p>
-            <p className="font-semibold text-lg">
-              ₹
-              {selectedTotalPrice > 0
-                ? selectedTotalPrice < 499
-                  ? selectedTotalPrice + 40
-                  : selectedTotalPrice
-                : 0}
-              .00
-            </p>
-          </div>
 
-          <button
-            onClick={handleCheckout}
-            className="w-full text-white bg-[#166831] rounded-md py-1 px-4 cursor-pointer mt-3"
-          >
-            Proceed to Buy
-          </button>
+            <h2 className="font-semibold border-b border-b-gray-300 mt-2">
+              Payment Details
+            </h2>
+
+            <div className="font-medium flex justify-between items-start">
+              <span className="mt-1 text-sm">
+                Subtotal ({selectedTotalItems} items):
+              </span>
+              <div className="flex gap-1">
+                <span className="text-sm mt-[1.8px]">₹</span>
+                <span className="text-xl">{selectedTotalPrice}.00</span>
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-gray-700 text-sm">Delivery Fee</p>
+              {selectedTotalPrice >= 499 ? (
+                <p className="text-sm text-gray-600 font-medium">₹ 0.00</p>
+              ) : (
+                <p className="text-sm text-gray-600 font-medium">+ ₹ 40.00</p>
+              )}
+            </div>
+            <div className="flex justify-between">
+              <p className="font-semibold text-lg">Order Total</p>
+              <p className="font-semibold text-lg">
+                ₹
+                {selectedTotalPrice > 0
+                  ? selectedTotalPrice < 499
+                    ? selectedTotalPrice + 40
+                    : selectedTotalPrice
+                  : 0}
+                .00
+              </p>
+            </div>
+
+            <button
+              onClick={handleCheckout}
+              className="w-full text-white bg-[#166831] rounded-md py-1 px-4 cursor-pointer mt-3"
+            >
+              Proceed to Buy
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+      {isAddressModalOpen && (
+        <AddressModal
+          addresses={user.addressHistory || []}
+          selectedAddress={shippingAddress}
+          onSelect={(addr) => {
+            setShippingAddress(addr);
+            setUser((prev) => ({
+              ...prev,
+              defaultShippingAddress: addr,
+            }));
+            setIsAddressModalOpen(false);
+          }}
+          onClose={() => setIsAddressModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
 

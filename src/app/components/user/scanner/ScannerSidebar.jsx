@@ -156,7 +156,10 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                   className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
                 >
                   <div
-                    onClick={() => setOpenMenuId(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(null)
+                    }}
                     className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-gray-100 text-gray-600 rounded-b-md cursor-pointer"
                   >
                     <img
@@ -167,7 +170,8 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                     Rename
                   </div>
                   <div
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleDeleteScan(scan._id);
                       setOpenMenuId(null);
                     }}

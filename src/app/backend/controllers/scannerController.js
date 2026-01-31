@@ -1,7 +1,8 @@
 import Scan from "../models/Scan.js";
+import User from "../models/User.js";
 import { model } from "../config/gemini.js";
 import { uploadImage } from "../../utils/cloudinary.js";
-import { connectDB } from '../config/db.js'
+import { connectDB } from "../config/db.js";
 import jwt from "jsonwebtoken";
 import fetch from "node-fetch";
 import FormData from "form-data";
@@ -9,6 +10,9 @@ import path from "path";
 
 // Disease Detection
 export const predictScan = async ({ body, userId }) => {
+  const user = await User.findById(userId).select("preferredLanguage");
+  const userLang = user?.preferredLanguage || "en";
+
   const { imageBase64 } = body;
   if (!imageBase64) throw new Error("Image is required");
 
@@ -19,7 +23,7 @@ export const predictScan = async ({ body, userId }) => {
 
   const buffer = await response.arrayBuffer();
   const ext = path.extname(imageUrl).toLowerCase();
-  let contentType = "image/png"; 
+  let contentType = "image/png";
   if (ext === ".jpg" || ext === ".jpeg") contentType = "image/jpeg";
 
   const formData = new FormData();
@@ -30,11 +34,14 @@ export const predictScan = async ({ body, userId }) => {
 
   let predictionResult;
   try {
-    const res = await fetch("https://plantdiseasedetection-p3cg.onrender.com/predict", {
-      method: "POST",
-      body: formData,
-      headers: formData.getHeaders(),
-    });
+    const res = await fetch(
+      "https://plantdiseasedetection-p3cg.onrender.com/predict",
+      {
+        method: "POST",
+        body: formData,
+        headers: formData.getHeaders(),
+      },
+    );
 
     if (!res.ok) {
       const text = await res.text();
@@ -47,12 +54,23 @@ export const predictScan = async ({ body, userId }) => {
     throw new Error("Prediction failed");
   }
 
-  const { disease: diseaseFull, plant_name: plantName, accuracy: confidence } = predictionResult;
+  const {
+    disease: diseaseFull,
+    plant_name: plantName,
+    accuracy: confidence,
+  } = predictionResult;
+
+  const languageMap = {
+    en: "English",
+    ta: "Tamil",
+  };
 
   let explanation = "No explanation available";
   try {
     const prompt = `
-      Explain the following plant disease to a farmer in simple language:
+      Explain the following plant disease to a farmer in ${
+        languageMap[userLang]
+      } language:
       Plant: "${plantName}"
       Disease: "${diseaseFull}"
       Confidence: ${confidence}%
@@ -66,7 +84,9 @@ export const predictScan = async ({ body, userId }) => {
 
     const result = await model.generateContent(prompt);
     let textResponse = result.response.text();
-    textResponse = textResponse.replace(/```json\s*([\s\S]*?)\s*```/i, "$1").trim();
+    textResponse = textResponse
+      .replace(/```json\s*([\s\S]*?)\s*```/i, "$1")
+      .trim();
 
     try {
       const parsed = JSON.parse(textResponse);
@@ -140,7 +160,6 @@ export const getScanById = async (token, scanId, res) => {
   }
 };
 
-
 // Delete Scan
 export const deleteScan = async (token, scanId, res) => {
   try {
@@ -152,7 +171,9 @@ export const deleteScan = async (token, scanId, res) => {
 
     const scan = await Scan.findOne({ _id: scanId, user: userId });
     if (!scan) {
-      return res.status(404).json({ error: "Scan not found or not authorized!" });
+      return res
+        .status(404)
+        .json({ error: "Scan not found or not authorized!" });
     }
 
     await Scan.deleteOne({ _id: scanId });
@@ -163,5 +184,3 @@ export const deleteScan = async (token, scanId, res) => {
     return res.status(500).json({ error: "Failed to delete scan!" });
   }
 };
-
-

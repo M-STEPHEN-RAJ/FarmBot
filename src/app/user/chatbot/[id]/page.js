@@ -8,10 +8,10 @@ import { API } from "@/app/utils/api";
 
 const ChatBot = () => {
   const params = useParams();
-
   const chatId = params?.id;
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // messages loading
+  const [langLoading, setLangLoading] = useState(true); // language loading
   const [currentUserId, setCurrentUserId] = useState(null);
 
   const [text, setText] = useState("");
@@ -27,8 +27,36 @@ const ChatBot = () => {
 
   const refreshSidebar = () => setRefreshFlag((prev) => !prev);
 
-  // Fetch messages
+  /** FETCH CURRENT USER & SET LANGUAGE */
+  const fetchCurrentUser = async () => {
+    try {
+      setLangLoading(true);
+      const res = await axios.get(`${API}/me`, { withCredentials: true });
+
+      if (res.data?.user?._id) {
+        const user = res.data.user;
+        setCurrentUserId(user._id);
+
+        // Set language based on API
+        if (user.preferredLanguage === "ta") {
+          setLang("ta-IN");
+        } else {
+          setLang("en-US");
+        }
+      } else {
+        toast.error("Failed to fetch user info");
+      }
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+      toast.error("Failed to fetch user info");
+    } finally {
+      setLangLoading(false);
+    }
+  };
+
+  /** FETCH CHAT MESSAGES */
   const fetchMessages = async () => {
+    if (!chatId) return;
     setLoading(true);
 
     try {
@@ -58,13 +86,28 @@ const ChatBot = () => {
     }
   };
 
-  useEffect(() => {
-    if (chatId) {
-      fetchMessages();
+  /** UPDATE LANGUAGE VIA API */
+  const updateLanguage = async (newLang) => {
+    try {
+      setLangLoading(true);
+      await axios.patch(
+        `${API}/me`,
+        {
+          preferredLanguage: newLang === "ta-IN" ? "ta" : "en",
+        },
+        { withCredentials: true }
+      );
+      setLang(newLang);
+      toast.success(`Language switched to ${newLang === "ta-IN" ? "Tamil" : "English"}`);
+    } catch (err) {
+      console.error("Failed to update language", err);
+      toast.error("Failed to update language");
+    } finally {
+      setLangLoading(false);
     }
-  }, [chatId]);
+  };
 
-  // Send Message
+  /** SEND MESSAGE */
   const sendMessage = async () => {
     if (!chatId) {
       toast.error("No chat selected!");
@@ -84,7 +127,6 @@ const ChatBot = () => {
         lang,
       });
 
-      setText("");
       await fetchMessages();
       refreshSidebar();
     } catch (err) {
@@ -93,12 +135,12 @@ const ChatBot = () => {
     }
   };
 
-  // Scroll to bottom
+  /** SCROLL TO BOTTOM */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Speech recognition setup
+  /** SPEECH RECOGNITION */
   useEffect(() => {
     if (typeof window !== "undefined") {
       const SpeechRecognition =
@@ -125,13 +167,12 @@ const ChatBot = () => {
     }
   }, []);
 
+  /** UPDATE RECOGNITION LANG WHEN LANG CHANGES */
   useEffect(() => {
     if (!recognitionRef.current) return;
-
     recognitionRef.current.lang = lang;
 
     if (prevLangRef.current !== lang) {
-      toast.success(`Switched to ${lang === "ta-IN" ? "Tamil" : "English"}`);
       prevLangRef.current = lang;
     }
   }, [lang]);
@@ -154,25 +195,27 @@ const ChatBot = () => {
     textarea.style.height = Math.min(textarea.scrollHeight, 5 * 24) + "px";
   };
 
+  /** INITIAL FETCH */
+  useEffect(() => {
+    fetchCurrentUser();
+    if (chatId) fetchMessages();
+  }, [chatId]);
+
   return (
     <div className="w-full flex h-screen overflow-hidden">
       <ChatSidebar selectedChatId={chatId} />
 
-      {/* CHANGE 1: This container now handles the scrolling for the whole screen */}
       <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-        {/* Centering Wrapper: This keeps your 800px design as it is */}
         <div className="flex-1 flex flex-col max-w-[800px] mx-auto w-full px-4">
-          {/* CHANGE 2: Removed overflow-y-auto from here so it doesn't fight with the parent */}
           <div className="flex-1 py-4 space-y-5">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`w-fit px-5 py-2 rounded-xl wrap-break-word
-              ${
-                msg.sender === "user"
-                  ? "bg-[#166831] text-white ml-auto max-w-[70%]"
-                  : "bg-white text-gray-800"
-              }`}
+                className={`w-fit px-5 py-2 rounded-xl wrap-break-word ${
+                  msg.sender === "user"
+                    ? "bg-[#166831] text-white ml-auto max-w-[70%]"
+                    : "bg-white text-gray-800"
+                }`}
                 dangerouslySetInnerHTML={{ __html: msg.text }}
               />
             ))}
@@ -199,7 +242,7 @@ const ChatBot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Your original Input Design preserved exactly */}
+          {/* Input */}
           <div className="space-y-2 sticky bottom-0 bg-white pt-2">
             <div
               className={`w-full flex px-2 py-1 ${
@@ -223,24 +266,34 @@ const ChatBot = () => {
                 placeholder="Ask Farm AI"
               />
               <div className="flex items-center gap-2">
+                {/* Language Switch */}
                 <div
-                  onClick={() => setLang(lang === "en-US" ? "ta-IN" : "en-US")}
-                  className="w-10 flex justify-center items-center p-2.5 hover:bg-gray-100 rounded-full cursor-pointer"
+                  onClick={() => {
+                    if (langLoading) return;
+                    const newLang = lang === "en-US" ? "ta-IN" : "en-US";
+                    updateLanguage(newLang);
+                  }}
+                  className={`w-10 h-10 flex justify-center items-center p-2.5 rounded-full cursor-pointer ${
+                    langLoading
+                      ? "bg-gray-100 animate-pulse hover:bg-gray-300"
+                      : "hover:bg-gray-100"
+                  }`}
                 >
-                  <p className="font-semibold">
-                    {lang === "en-US" ? "en" : "த"}
-                  </p>
+                  {!langLoading && <p className="font-semibold">{lang === "en-US" ? "en" : "த"}</p>}
                 </div>
+
+                {/* Send / Mic */}
                 <div
                   className={`w-10 p-2 rounded-full cursor-pointer ${
                     listening ? "bg-red-500" : "bg-[#166831]"
-                  }`}
-                  onClick={text.length > 0 ? sendMessage : startListening}
+                  } ${langLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={() => {
+                    if (langLoading) return;
+                    text.length > 0 ? sendMessage() : startListening();
+                  }}
                 >
                   <img
-                    src={`/images/user/chatbot/${
-                      text.length > 0 ? "send" : "microphone"
-                    }.png`}
+                    src={`/images/user/chatbot/${text.length > 0 ? "send" : "microphone"}.png`}
                     alt=""
                     className="w-8"
                   />

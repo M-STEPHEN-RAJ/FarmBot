@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { API } from "@/app/utils/api";
 import { toast } from "react-hot-toast";
@@ -10,6 +10,9 @@ import scannerAnimation from "../../../../public/lottie/scanner-animation.json";
 const ScannerHome = () => {
   const router = useRouter();
   const fileInputRef = useRef(null);
+
+  const [lang, setLang] = useState("en");
+  const [langLoading, setLangLoading] = useState(true);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -27,6 +30,37 @@ const ScannerHome = () => {
       reader.onload = () => resolve(reader.result);
       reader.onerror = reject;
     });
+
+  const fetchCurrentUser = async () => {
+    try {
+      setLangLoading(true);
+      const res = await fetch(`${API}/me`, { credentials: "include" });
+      const data = await res.json();
+
+      if (data?.user?.preferredLanguage) {
+        setLang(data.user.preferredLanguage);
+      }
+    } catch (err) {
+      toast.error("Failed to load language");
+    } finally {
+      setLangLoading(false);
+    }
+  };
+
+  const updateLanguage = async (newLang) => {
+    try {
+      await fetch(`${API}/me`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ preferredLanguage: newLang }),
+      });
+
+      setLang(newLang);
+    } catch (err) {
+      toast.error("Failed to update language");
+    }
+  };
 
   const sendToScanner = async (file) => {
     try {
@@ -81,7 +115,7 @@ const ScannerHome = () => {
         setIsScanning(false);
       }
     },
-    [router, sendToScanner]
+    [router, sendToScanner],
   );
 
   const handleFile = async (file) => {
@@ -114,6 +148,10 @@ const ScannerHome = () => {
     fileInputRef.current.click();
   };
 
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
+
   return (
     <div className="w-full h-screen flex overflow-hidden">
       <ScannerSidebar />
@@ -131,67 +169,81 @@ const ScannerHome = () => {
             </p>
           </div>
         ) : (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          >
-            {isDragging && (
-              <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#166831]/80 pointer-events-none">
-                <img
-                  className="absolute w-10 top-5 left-5"
-                  src="/images/user/scanner/overlay.png"
-                  alt=""
-                />
-                <img
-                  className="absolute w-10 top-5 right-5 rotate-90"
-                  src="/images/user/scanner/overlay.png"
-                  alt=""
-                />
-                <img
-                  className="absolute w-10 bottom-5 left-5 rotate-270"
-                  src="/images/user/scanner/overlay.png"
-                  alt=""
-                />
-                <img
-                  className="absolute w-10 bottom-5 right-5 rotate-180"
-                  src="/images/user/scanner/overlay.png"
-                  alt=""
-                />
-                <p className="text-white text-3xl font-bold text-center">
-                  Drop image anywhere
-                </p>
-              </div>
-            )}
-            <div className="w-full max-w-[700px] flex flex-col justify-center items-center gap-10">
-              <div className="space-y-2">
-                <h2 className="text-2xl font-medium">Upload your Image</h2>
-                <p className="text-sm text-gray-600 text-center">
-                  Drag & Drop your image here
-                </p>
-              </div>
-              <div
-                onClick={handleClickUpload}
-                className="w-[450px] h-[250px] flex flex-col items-center justify-center border-2 border-green-600 border-dashed rounded-lg cursor-pointer"
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/png, image/jpeg, image/jpg"
-                  hidden
-                  onChange={(e) => handleFile(e.target.files[0])}
-                />
-                <div className="w-40 h-40 relative bg-[#166831] rounded-full">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-[60px] bg-white rounded-xl z-10 shadow-2xl"></div>
-                  <div className="absolute top-9.5 left-8 w-12 h-[50px] bg-gray-300 rounded-tl-[10px] rounded-tr-md"></div>
-                  <div className="absolute top-11 left-19 w-12.5 h-[50px] bg-gray-300 rounded-r-[10px]"></div>
+          <div className="flex flex-col justify-center items-center">
+            <div
+              className="w-full h-full flex items-center justify-center"
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              {isDragging && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#166831]/80 pointer-events-none">
+                  <img
+                    className="absolute w-10 top-5 left-5"
+                    src="/images/user/scanner/overlay.png"
+                    alt=""
+                  />
+                  <img
+                    className="absolute w-10 top-5 right-5 rotate-90"
+                    src="/images/user/scanner/overlay.png"
+                    alt=""
+                  />
+                  <img
+                    className="absolute w-10 bottom-5 left-5 rotate-270"
+                    src="/images/user/scanner/overlay.png"
+                    alt=""
+                  />
+                  <img
+                    className="absolute w-10 bottom-5 right-5 rotate-180"
+                    src="/images/user/scanner/overlay.png"
+                    alt=""
+                  />
+                  <p className="text-white text-3xl font-bold text-center">
+                    Drop image anywhere
+                  </p>
                 </div>
-                <p className="text-gray-500 text-sm mt-5">
-                  Image should be png, jpg, jpeg.
-                </p>
+              )}
+              <div className="w-full max-w-[700px] flex flex-col justify-center items-center gap-10">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-medium">Upload your Image</h2>
+                  <p className="text-sm text-gray-600 text-center">
+                    Drag & Drop your image here
+                  </p>
+                </div>
+                <div
+                  onClick={handleClickUpload}
+                  className="w-[450px] h-[250px] flex flex-col items-center justify-center border-2 border-green-600 border-dashed rounded-lg cursor-pointer"
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png, image/jpeg, image/jpg"
+                    hidden
+                    onChange={(e) => handleFile(e.target.files[0])}
+                  />
+                  <div className="w-40 h-40 relative bg-[#166831] rounded-full">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-[60px] bg-white rounded-xl z-10 shadow-2xl"></div>
+                    <div className="absolute top-9.5 left-8 w-12 h-[50px] bg-gray-300 rounded-tl-[10px] rounded-tr-md"></div>
+                    <div className="absolute top-11 left-19 w-12.5 h-[50px] bg-gray-300 rounded-r-[10px]"></div>
+                  </div>
+                  <p className="text-gray-500 text-sm mt-5">
+                    Image should be png, jpg, jpeg.
+                  </p>
+                </div>
               </div>
+            </div>
+            <div className="w-full max-w-[400px] flex justify-between items-center px-5 py-1 rounded-2xl border border-gray-300 mt-10">
+              <h2 className="font-medium text-lg">Select Language</h2>
+              <button
+                disabled={langLoading}
+                onClick={() => updateLanguage(lang === "en" ? "ta" : "en")}
+                className={`w-10 h-10 rounded-full font-semibold transition cursor-pointer hover:bg-gray-200
+      ${langLoading ? "opacity-50 cursor-not-allowed" : ""}
+    `}
+              >
+                {lang === "en" ? "en" : "த"}   
+              </button>
             </div>
           </div>
         )}

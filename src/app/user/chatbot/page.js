@@ -10,10 +10,11 @@ const ChatBotHome = () => {
   const router = useRouter();
 
   const [userId, setUserId] = useState(null);
+  const [langLoading, setLangLoading] = useState(true);
 
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
-  const [lang, setLang] = useState("en-US");
+  const [lang, setLang] = useState("");
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [messages, setMessages] = useState([]);
 
@@ -24,15 +25,41 @@ const ChatBotHome = () => {
   // Get Current User Login
   const fetchCurrentUser = async () => {
     try {
+      setLangLoading(true);
+
       const res = await axios.get(`${API}/me`, { withCredentials: true });
       if (res.data?.user?._id) {
-        setUserId(res.data.user._id);
+        const user = res.data.user;
+
+        setUserId(user._id);
+
+        if (user.preferredLanguage === "ta") {
+          setLang("ta-IN");
+        } else {
+          setLang("en-US");
+        }
       } else {
         toast.error("Failed to get user info");
       }
     } catch (err) {
       console.error("Failed to fetch user!", err);
       toast.error("Failed to fetch user info!");
+    } finally {
+      setLangLoading(false);
+    }
+  };
+
+  const updateLanguage = async (newLang) => {
+    try {
+      await axios.patch(
+        `${API}/me`,
+        {
+          preferredLanguage: newLang === "ta-IN" ? "ta" : "en",
+        },
+        { withCredentials: true },
+      );
+    } catch (err) {
+      console.error("Failed to update language", err);
     }
   };
 
@@ -44,12 +71,16 @@ const ChatBotHome = () => {
       let chatId = selectedChatId;
 
       if (!chatId) {
-        const { data } = await axios.post(`${API}/chatbot/new`, {          
-          title: "New Chat",
-          language: lang,
-        }, {
-          withCredentials: true
-        });
+        const { data } = await axios.post(
+          `${API}/chatbot/new`,
+          {
+            title: "New Chat",
+            language: lang,
+          },
+          {
+            withCredentials: true,
+          },
+        );
         chatId = data.chatId;
         setSelectedChatId(chatId);
       }
@@ -60,13 +91,13 @@ const ChatBotHome = () => {
       await axios.post(
         `${API}/chatbot/send`,
         {
-          chatId,          
+          chatId,
           message: userMessage,
           lang,
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       router.push(`/user/chatbot/${chatId}`);
@@ -79,7 +110,7 @@ const ChatBotHome = () => {
   const fetchChatMessages = async (chatId) => {
     try {
       const { data } = await axios.get(`${API}/chatbot/${chatId}`, {
-        withCredentials: true
+        withCredentials: true,
       });
       setMessages(data.messages || []);
     } catch (err) {
@@ -98,30 +129,36 @@ const ChatBotHome = () => {
   }, [userId, selectedChatId]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!lang) return;
 
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.lang = lang;
+    if (typeof window === "undefined") return;
 
-        recognition.onstart = () => setListening(true);
-        recognition.onend = () => setListening(false);
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        recognition.onresult = (event) => {
-          const transcript = Array.from(event.results)
-            .map((result) => result[0].transcript)
-            .join("");
-          setText(transcript);
-        };
+    if (!SpeechRecognition) return;
 
-        recognitionRef.current = recognition;
-      }
-    }
-  }, []);
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = lang;
+
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => setListening(false);
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0].transcript)
+        .join("");
+      setText(transcript);
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.abort();
+    };
+  }, [lang]);
 
   useEffect(() => {
     if (!recognitionRef.current) return;
@@ -129,7 +166,6 @@ const ChatBotHome = () => {
     recognitionRef.current.lang = lang;
 
     if (prevLangRef.current !== lang) {
-      toast.success(`Switched to ${lang === "ta-IN" ? "Tamil" : "English"}`);
       prevLangRef.current = lang;
     }
   }, [lang]);
@@ -187,17 +223,30 @@ const ChatBotHome = () => {
 
             <div className="flex items-center gap-3">
               <div
-                onClick={() => setLang(lang === "en-US" ? "ta-IN" : "en-US")}
-                className="w-10 flex justify-center items-center p-2.5 hover:bg-gray-100 rounded-full cursor-pointer"
+                onClick={() => {
+                  if (langLoading) return;
+                  const newLang = lang === "en-US" ? "ta-IN" : "en-US";
+                  setLang(newLang);
+                  updateLanguage(newLang);
+                }}
+                className={`w-10 h-10 flex justify-center items-center p-2.5 rounded-full cursor-pointer 
+    ${langLoading ? "bg-gray-100 animate-pulse hover:bg-gray-300" : "hover:bg-gray-100"}`}
               >
-                <p className="font-semibold">{lang === "en-US" ? "en" : "த"}</p>
+                {!langLoading && (
+                  <p className="font-semibold">
+                    {lang === "en-US" ? "en" : "த"}
+                  </p>
+                )}
               </div>
 
               <div
                 className={`w-10 p-2 rounded-full cursor-pointer ${
                   listening ? "bg-red-500" : "bg-[#166831]"
-                }`}
-                onClick={text.length > 0 ? handleSend : startListening}
+                } ${langLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={() => {
+                  if (langLoading) return;
+                  text.length > 0 ? handleSend() : startListening();
+                }}
               >
                 <img
                   src={`/images/user/chatbot/${
