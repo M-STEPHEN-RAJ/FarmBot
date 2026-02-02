@@ -6,7 +6,7 @@ export default function SellerSettingsLayout({ children }) {
     <div className="w-full flex min-h-screen">
       <SellerSettingsSidebar />
 
-      <div className="flex-1 p-4">
+      <div className="flex-1 h-screen overflow-y-auto p-4">
         {children}
       </div>
     </div>

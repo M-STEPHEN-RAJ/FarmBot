@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 const SettingsSidebar = () => {
-
   const router = useRouter();
   const pathname = usePathname();
 
@@ -35,7 +34,7 @@ const SettingsSidebar = () => {
 
           <div className="space-y-0.5 pr-2">
             <div
-              onClick={() => router.push("/user/settings/accounts")}
+              onClick={() => router.push("/seller/settings/accounts")}
               className={`px-2 py-2 flex items-center gap-3 hover:bg-red-100 ${
                 pathname.includes("accounts")
                   ? "bg-red-200 hover:bg-red-300"
@@ -52,7 +51,14 @@ const SettingsSidebar = () => {
           </div>
 
           <div className="space-y-0.5 pr-2">
-            <div className="px-2 py-2 flex items-center gap-3 hover:bg-red-100 rounded-md cursor-pointer">
+            <div
+              onClick={() => router.push("/seller/settings/privacy")}
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-red-100 ${
+                pathname.includes("privacy")
+                  ? "bg-red-200 hover:bg-red-300"
+                  : ""
+              } rounded-md cursor-pointer`}
+            >
               <img
                 src="/images/user/settings/privacy.png"
                 alt=""
@@ -74,7 +80,14 @@ const SettingsSidebar = () => {
           </div>
 
           <div className="space-y-0.5 pr-2">
-            <div className="px-2 py-2 flex items-center gap-3 hover:bg-red-100 rounded-md cursor-pointer">
+            <div
+              onClick={() => router.push("/seller/settings/notification")}
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-red-100 ${
+                pathname.includes("notification")
+                  ? "bg-red-200 hover:bg-red-300"
+                  : ""
+              } rounded-md cursor-pointer`}
+            >
               <img
                 src="/images/user/settings/notification.png"
                 alt=""
@@ -85,7 +98,6 @@ const SettingsSidebar = () => {
           </div>
         </div>
       </div>
-      
     </div>
   );
 };

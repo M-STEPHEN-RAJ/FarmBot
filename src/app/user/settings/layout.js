@@ -6,7 +6,7 @@ export default function SettingsLayout({ children }) {
     <div className="w-full flex min-h-screen">
       <SettingsSidebar />
 
-      <div className="flex-1 p-4">
+      <div className="flex-1 h-screen overflow-y-auto p-4">
         {children}
       </div>
     </div>
