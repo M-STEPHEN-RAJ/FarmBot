@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { gsap } from "gsap";
+import TrackOrderModal from "@/app/components/user/order/Modal/TrackOrderModal";
 
 const Order = () => {
   const tabRefs = useRef([]);
@@ -11,6 +12,10 @@ const Order = () => {
   const [active, setActive] = useState("Orders");
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
+  const [trackItem, setTrackItem] = useState(null);
+  const [itemStatus, setItemStatus] = useState("");
+  const dropdownRef = useRef(null);
+  const [statusOpen, setStatusOpen] = useState(false);
 
   const tabs = ["Orders", "Buy Again", "Cancelled Orders"];
 
@@ -29,6 +34,15 @@ const Order = () => {
     },
   };
 
+  const itemStatusOptions = [
+    { value: "", label: "All" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "processing", label: "Processing" },
+    { value: "shipped", label: "Shipped" },
+    { value: "out_for_delivery", label: "Out for Delivery" },
+    { value: "delivered", label: "Delivered" },
+  ];
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -39,7 +53,8 @@ const Order = () => {
       const res = await axios.get("/api/order", {
         params: {
           search,
-          status,
+          status: active,
+          itemStatus,
         },
         withCredentials: true,
       });
@@ -54,7 +69,7 @@ const Order = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [active, search]);
+  }, [active, search, itemStatus]);
 
   useEffect(() => {
     const activeIndex = tabs.indexOf(active);
@@ -69,6 +84,17 @@ const Order = () => {
       });
     }
   }, [active]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setStatusOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="w-full max-w-[1150px] flex flex-col pr-4 py-4">
@@ -99,15 +125,58 @@ const Order = () => {
             ))}
           </div>
 
-          <div className="w-[380px] flex justify-between items-center border border-gray-300 rounded-full pl-3 pr-2 py-1.5">
-            <input
-              type="text"
-              className="w-full outline-none"
-              placeholder="search for orders"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <img src="/images/user/store/search.png" alt="" className="w-5" />
+          <div className="flex items-center gap-4">
+            <div className="w-[380px] flex justify-between items-center border border-gray-300 rounded-full pl-3 pr-2 py-1.5">
+              <input
+                type="text"
+                className="w-full outline-none"
+                placeholder="search for orders"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <img src="/images/user/store/search.png" alt="" className="w-5" />
+            </div>
+
+            <div
+              ref={dropdownRef}
+              className="relative px-3 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[170px]"
+              onClick={() => setStatusOpen((prev) => !prev)}
+            >
+              <p className="text-sm font-medium capitalize">
+                {itemStatusOptions.find((s) => s.value === itemStatus)?.label ||
+                  "All Status"}
+              </p>
+
+              <img
+                className={`w-3 transition-transform duration-200 ${
+                  statusOpen ? "rotate-180" : ""
+                }`}
+                src="/images/landing/dropdown.png"
+                alt=""
+              />
+
+              {statusOpen && (
+                <div className="absolute top-[110%] left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                  {itemStatusOptions.map((status) => (
+                    <div
+                      key={status.value}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setItemStatus(status.value);
+                        setStatusOpen(false);
+                      }}
+                      className={`px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer capitalize rounded-md ${
+                        itemStatus === status.value
+                          ? "bg-gray-100 font-medium"
+                          : ""
+                      }`}
+                    >
+                      {status.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -200,7 +269,10 @@ const Order = () => {
                           </div>
                         </div>
                         <div className="flex flex-col gap-5">
-                          <button className="py-1 px-8 text-white bg-[#166831] rounded-md cursor-pointer">
+                          <button
+                            onClick={() => setTrackItem(item)}
+                            className="py-1 px-8 text-white bg-[#166831] rounded-md cursor-pointer"
+                          >
                             Track Package
                           </button>
                           <button className="py-1 px-8 text-[#166831] border border-[#166831] rounded-md cursor-pointer">
@@ -216,6 +288,9 @@ const Order = () => {
           )}
         </div>
       </div>
+      {trackItem && (
+        <TrackOrderModal item={trackItem} onClose={() => setTrackItem(null)} />
+      )}
     </div>
   );
 };

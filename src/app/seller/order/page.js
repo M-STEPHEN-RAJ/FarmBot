@@ -7,20 +7,29 @@ import { toast } from "react-hot-toast";
 const Order = () => {
   const tabRefs = useRef([]);
   const indicatorRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState("confirmed");
+  const [active, setActive] = useState("");
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
+  const [orderStatus, setOrderStatus] = useState("placed");
+  const [statusOpen, setStatusOpen] = useState(false);
 
-  const tabs = [
+  const orderFlowOptions = [
+    { value: "", label: "All" },
     { value: "confirmed", label: "Confirmed" },
     { value: "processing", label: "Processing" },
     { value: "shipped", label: "Shipped" },
     { value: "out_for_delivery", label: "Out For Delivery" },
     { value: "delivered", label: "Delivered" },
-    { value: "cancelled", label: "Cancelled" },
     { value: "returned", label: "Returned" },
+  ];
+
+  const tabs = [
+    { value: "placed", label: "Placed" },
+    { value: "completed", label: "Completed" },
+    { value: "cancelled", label: "Cancelled" },
   ];
 
   const emptyStateContent = {
@@ -62,6 +71,7 @@ const Order = () => {
         params: {
           search,
           status: active,
+          orderStatus,
         },
         withCredentials: true,
       });
@@ -77,10 +87,10 @@ const Order = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [active, search]);
+  }, [active, search, orderStatus]);
 
   useEffect(() => {
-    const activeIndex = tabs.findIndex((tab) => tab.value === active);
+    const activeIndex = tabs.findIndex((tab) => tab.value === orderStatus);
     const activeTab = tabRefs.current[activeIndex];
 
     if (activeTab && indicatorRef.current) {
@@ -91,7 +101,18 @@ const Order = () => {
         ease: "power3.out",
       });
     }
-  }, [active]);
+  }, [orderStatus]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setStatusOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="w-full max-w-[1150px] flex flex-col pr-4 py-4">
@@ -111,9 +132,9 @@ const Order = () => {
               <p
                 key={tab.value}
                 ref={(el) => (tabRefs.current[index] = el)}
-                onClick={() => setActive(tab.value)}
+                onClick={() => setOrderStatus(tab.value)} 
                 className={`cursor-pointer pb-2 px-7 transition-colors duration-200 ${
-                  active === tab.value
+                  orderStatus === tab.value  
                     ? "text-[#EB3D3F] font-semibold"
                     : "text-gray-500 hover:text-gray-600"
                 }`}
@@ -123,16 +144,56 @@ const Order = () => {
             ))}
           </div>
 
-          {/* Search */}
-          <div className="w-[380px] flex justify-between items-center border border-gray-300 rounded-full pl-3 pr-2 py-1.5">
-            <input
-              type="text"
-              className="w-full outline-none"
-              placeholder="search for orders"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <img src="/images/user/store/search.png" alt="" className="w-5" />
+          <div className="flex items-center gap-5">
+            {/* Search */}
+            <div className="w-[380px] flex justify-between items-center border border-gray-300 rounded-full pl-3 pr-2 py-1.5">
+              <input
+                type="text"
+                className="w-full outline-none"
+                placeholder="search for orders"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <img src="/images/user/store/search.png" alt="" className="w-5" />
+            </div>
+            <div
+              ref={dropdownRef}
+              className="relative px-2 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[150px]"
+              onClick={() => setStatusOpen((prev) => !prev)}
+            >
+              <p className="text-sm font-medium capitalize">
+                {orderFlowOptions.find((s) => s.value === active)?.label}
+              </p>
+
+              <img
+                className={`w-3 transition-transform duration-200 ${
+                  statusOpen ? "rotate-180" : ""
+                }`}
+                src="/images/landing/dropdown.png"
+                alt=""
+              />
+
+              {statusOpen && (
+                <div className="absolute top-[110%] left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                  {orderFlowOptions.map((status) => (
+                    <div
+                      key={status.value}
+                      onClick={() => {
+                        setActive(status.value);
+                        setStatusOpen(false);
+                      }}
+                      className={`px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer capitalize rounded-md ${
+                        active === status.value
+                          ? "bg-gray-100 font-medium"
+                          : ""
+                      }`}
+                    >
+                      {status.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Loading / Empty / Orders */}
@@ -192,7 +253,7 @@ const Order = () => {
                       className={`${
                         order.items.length > 1 &&
                         index !== order.items.length - 1
-                          ? "border-b border-gray-300"
+                          ? "border-b border-gray-300 py-2"
                           : ""
                       }`}
                     >
@@ -218,7 +279,7 @@ const Order = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-sm">
                               <p className="font-medium">Sold by</p>
-                              <p>{item.sellerId?.name || "Seller"}</p>
+                              <p>{item.sellerId?.name || "FarmBot"}</p>
 
                               <p className="font-medium">Payment</p>
                               <p>{order.payment.method}</p>

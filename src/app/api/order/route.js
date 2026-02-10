@@ -90,6 +90,7 @@ export async function GET(req) {
     const url = new URL(req.url);
     const search = url.searchParams.get("search") || "";
     const tab = url.searchParams.get("status") || "Orders";
+    const itemStatus = url.searchParams.get("itemStatus");
 
     const query = { userId };
 
@@ -105,6 +106,15 @@ export async function GET(req) {
       query.items = {
         $elemMatch: {
           status: { $nin: ["delivered", "cancelled"] },
+        },
+      };
+    }
+
+    if (itemStatus) {
+      query.items = {
+        $elemMatch: {
+          ...(query.items?.$elemMatch || {}),
+          status: itemStatus,
         },
       };
     }
