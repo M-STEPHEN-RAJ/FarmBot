@@ -139,7 +139,7 @@ const Order = () => {
 
             <div
               ref={dropdownRef}
-              className="relative px-3 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[170px]"
+              className="relative px-2 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[150px]"
               onClick={() => setStatusOpen((prev) => !prev)}
             >
               <p className="text-sm font-medium capitalize">
@@ -227,14 +227,14 @@ const Order = () => {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 ">
                   {order.items.map((item, index) => (
                     <div
                       key={item._id}
                       className={`${
                         order.items.length > 1 &&
                         index !== order.items.length - 1
-                          ? "border-b border-gray-300"
+                          ? "border-b border-gray-300 py-2"
                           : ""
                       }`}
                     >

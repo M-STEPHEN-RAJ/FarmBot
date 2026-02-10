@@ -144,7 +144,7 @@ const Order = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-4">
             {/* Search */}
             <div className="w-[380px] flex justify-between items-center border border-gray-300 rounded-full pl-3 pr-2 py-1.5">
               <input
@@ -196,7 +196,6 @@ const Order = () => {
             </div>
           </div>
 
-          {/* Loading / Empty / Orders */}
           {loading ? (
             <div className="h-[50vh] flex items-center justify-center">
               <div className="w-10 h-10 border-4 border-[#EB3D3F] border-t-transparent rounded-full animate-spin"></div>
