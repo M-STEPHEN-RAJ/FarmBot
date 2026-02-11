@@ -5,7 +5,6 @@ import { model } from "../config/gemini";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
-// Ensure the User model is registered
 mongoose.model('User', User.schema);
 
 // Create New Chat
@@ -156,3 +155,36 @@ export const getChatById = async (token, chatId) => {
   }
 };
 
+// Rename chat title
+export const renameChat = async (token, chatId, newTitle, res) => {
+  try {
+    await connectDB();
+
+    if (!token) throw new Error("Unauthorized: No token");
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    if (!newTitle || !newTitle.trim()) {
+      return res.status(400).json({ error: "Title is required!" });
+    }
+
+    const chat = await Chat.findOneAndUpdate(
+      { _id: chatId, userId },
+      { title: newTitle.slice(0, 50) },
+      { new: true }
+    );
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found!" });
+    }
+
+    return res.json({
+      success: true,
+      title: chat.title
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to rename chat!" });
+  }
+};

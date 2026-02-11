@@ -10,10 +10,13 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [editingChatId, setEditingChatId] = useState(null);
+  const [editedTitle, setEditedTitle] = useState("");
 
   const router = useRouter();
   const dropdownRef = useRef(null);
   const chatRefs = useRef([]);
+  const renameInputRef = useRef(null);
 
   // Fetch all converstions
   const fetchConversations = async () => {
@@ -47,6 +50,39 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
     }
   };
 
+  // Rename Chat
+  const handleRenameChat = async (chatId) => {
+    try {
+      if (!editedTitle.trim()) return;
+
+      const res = await fetch(`${API}/chatbot/${chatId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          title: editedTitle,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      toast.success("Chat renamed!");
+
+      setConversations((prev) =>
+        prev.map((c) => (c._id === chatId ? { ...c, title: data.title } : c)),
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Rename failed!");
+    } finally {
+      setEditingChatId(null);
+    }
+  };
+
   const handleNewChat = async () => {
     router.push("/user/chatbot");
   };
@@ -56,10 +92,30 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
       gsap.fromTo(
         chatRefs.current,
         { opacity: 0, x: -20 },
-        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" }
+        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" },
       );
     }
   }, [conversations]);
+
+  useEffect(() => {
+    if (!editingChatId) return;
+
+    const handleClickOutsideRename = (e) => {
+      if (
+        renameInputRef.current &&
+        !renameInputRef.current.contains(e.target)
+      ) {
+        setEditingChatId(null);
+        setEditedTitle("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutsideRename);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideRename);
+    };
+  }, [editingChatId]);
 
   useEffect(() => {
     fetchConversations();
@@ -142,7 +198,28 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
                     : "hover:bg-gray-100"
                 } rounded-md cursor-pointer group`}
               >
-                <p className="text-sm truncate">{chat.title}</p>
+                {editingChatId === chat._id ? (
+                  <input
+                    ref={renameInputRef}
+                    autoFocus
+                    value={editedTitle}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleRenameChat(chat._id);
+                      }
+                      if (e.key === "Escape") {
+                        setEditingChatId(null);
+                        setEditedTitle("");
+                      }
+                    }}
+                    className="text-sm w-full bg-white border border-gray-300 rounded px-1 outline-none"
+                  />
+                ) : (
+                  <p className="text-sm truncate">{chat.title}</p>
+                )}
+
                 <img
                   onClick={(e) => {
                     e.stopPropagation();
@@ -163,7 +240,10 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
                     className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
                   >
                     <div
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingChatId(chat._id);
+                        setEditedTitle(chat.title);
                         setOpenMenuId(null);
                       }}
                       className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-gray-100 text-gray-600 rounded-b-md cursor-pointer"
@@ -177,7 +257,8 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
                     </div>
 
                     <div
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleDeleteChat(chat._id);
                         setOpenMenuId(null);
                       }}

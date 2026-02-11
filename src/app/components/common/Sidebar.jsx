@@ -53,9 +53,10 @@ const Sidebar = ({ loading, setLoading }) => {
 
           <div className="space-y-1">
             <div
+              onClick={() => navigate("/user/dashboard")}
               className={`p-2 ${
                 isActive("/user/dashboard")
-                  ? "bg-gray-300 hover:bg-gray-400"
+                  ? "bg-gray-100 hover:bg-gray-200"
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
