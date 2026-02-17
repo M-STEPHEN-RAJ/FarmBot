@@ -26,8 +26,6 @@ const Sidebar = ({ loading, setLoading }) => {
       });
 
       setUser(res.data.user);
-
-      console.log(res.data.user);
     } catch (err) {
       console.error(err);
     } finally {

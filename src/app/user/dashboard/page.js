@@ -1,16 +1,23 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
+  const [dashboard, setDashboard] = useState(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
   const [currentTime, setCurrentTime] = useState(null);
   const [weather, setWeather] = useState(null);
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(new Date().getFullYear());
   const [openYear, setOpenYear] = useState(false);
+  const [selectedCropIndex, setSelectedCropIndex] = useState(0);
+  const [openCrop, setOpenCrop] = useState(false);
 
-  const cropStartDate = "2026-02-12";
-  const harvestDays = 90;
+  const activeCrop = dashboard?.crops?.[selectedCropIndex];
+
+  const cropStartDate = activeCrop?.startDate;
+  const harvestDays = activeCrop?.harvestDays;
 
   const fetchWeather = async () => {
     try {
@@ -23,11 +30,28 @@ const Dashboard = () => {
     }
   };
 
+  const fetchDashboard = async () => {
+    try {
+      setLoadingDashboard(true);
+      const res = await axios.get("/api/dashboard");
+
+      setDashboard(res.data);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to load dashboard");
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
+
   useEffect(() => {
     fetchWeather();
+    fetchDashboard();
   }, []);
 
   const heatmapDays = useMemo(() => {
+    if (!cropStartDate || !harvestDays) return [];
+
     const blocks = [];
 
     const yearStart = new Date(year, 0, 1); // Jan 1
@@ -55,17 +79,24 @@ const Dashboard = () => {
 
       // Crop progress calculation
       const cropStart = new Date(cropStartDate);
-      const diff =
-        Math.floor((current - cropStart) / (1000 * 60 * 60 * 24)) + 1;
+      cropStart.setHours(0, 0, 0, 0);
+      const cropEnd = new Date(cropStart);
+      cropEnd.setDate(cropStart.getDate() + harvestDays - 1);
 
-      let color = "bg-gray-100";
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      current.setHours(0, 0, 0, 0);
 
-      if (diff > 0 && diff <= harvestDays) {
-        const p = diff / harvestDays;
-        if (p <= 0.25) color = "bg-green-200 cursor-pointer transition-all duration-200 hover:scale-115";
-        else if (p <= 0.5) color = "bg-green-300 cursor-pointer transition-all duration-200 hover:scale-115";
-        else if (p <= 0.75) color = "bg-green-500 cursor-pointer transition-all duration-200 hover:scale-115";
-        else color = "bg-green-700 cursor-pointer transition-all duration-200 hover:scale-115";
+      let color = "bg-gray-200";
+
+      if (current >= cropStart && current <= cropEnd) {
+        if (current <= today) {
+          color =
+            "bg-green-800 cursor-pointer transition-all duration-200 hover:scale-110";
+        } else {
+          color =
+            "bg-green-300 cursor-pointer transition-all duration-200 hover:scale-110";
+        }
       }
 
       blocks.push({
@@ -185,35 +216,109 @@ const Dashboard = () => {
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
           <h2>Crop Progress</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold">87%</p>
-            <p className="text-sm">Day 61 of 90</p>
+            <p className="text-3xl font-bold">
+              {activeCrop?.progress ?? "--"}%
+            </p>
+            <p className="text-sm">
+              Day{" "}
+              {activeCrop?.daysRemaining !== undefined
+                ? activeCrop.harvestDays - activeCrop.daysRemaining
+                : "--"}{" "}
+              of {activeCrop?.harvestDays ?? "--"}
+            </p>
           </div>
         </div>
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
           <h2>Days Remaining</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold">29 <span className="text-lg font-bold">Days</span></p>
-            <p className="text-sm">Harvest: May 13</p>
+            <p className="text-3xl font-bold">
+              {activeCrop?.daysRemaining ?? "--"}{" "}
+              <span className="text-lg font-bold">Days</span>
+            </p>
+            <p className="text-sm">
+              Harvest:{" "}
+              {activeCrop?.harvestDate
+                ? new Date(activeCrop.harvestDate).toDateString()
+                : "--"}
+            </p>
           </div>
         </div>
-        <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
+        <div className="h-[120px] flex flex-col gap-[17px] px-4 py-2 border border-gray-300 rounded-md">
           <h2>Crop Health</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold truncate">Healthy</p>
-            <p className="text-sm">Confidence: 94%</p>
+            <p className="text-2xl font-bold truncate">
+              {activeCrop?.health?.result ?? "No Scan"}
+            </p>
+            <p className="text-sm">
+              Confidence:{" "}
+              {activeCrop?.health?.confidence
+                ? `${Math.round(activeCrop.health.confidence)}%`
+                : "--"}
+            </p>
           </div>
         </div>
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
           <h2>Total Predictions</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold">03</p>
+            <p className="text-3xl font-bold">0</p>
             <p className="text-sm">Across all AI models</p>
           </div>
         </div>
       </div>
       <div className="h-[200px] px-4 py-2 space-y-4 border border-gray-300 rounded-md">
         <div className="flex justify-between">
-          <p>Plant Name</p>
+          <div className="flex items-center gap-3">
+            <p className="font-medium">Plant Name</p>
+
+            {/* Crop Dropdown */}
+            <div className="relative">
+              <div
+                onClick={() => setOpenCrop((v) => !v)}
+                className="flex items-center justify-between gap-4 px-3 py-0.5 border border-gray-300 rounded-md cursor-pointer
+        hover:bg-gray-50 select-none min-w-[120px]"
+              >
+                <p className="truncate">{activeCrop?.name ?? "Select Crop"}</p>
+
+                <svg
+                  className={`w-4 h-4 transition-transform ${
+                    openCrop ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+
+              {openCrop && (
+                <div className="absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
+                  {dashboard?.crops?.map((crop, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        setSelectedCropIndex(idx);
+                        setOpenCrop(false);
+                      }}
+                      className={`px-4 py-2 cursor-pointer text-sm rounded-md
+              ${
+                idx === selectedCropIndex
+                  ? "hover:bg-gray-100 font-semibold"
+                  : "hover:bg-gray-50"
+              }`}
+                    >
+                      {crop.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
           <div className="flex items-center gap-5">
             <p>Total Days: {harvestDays}</p>
             <div className="relative">
@@ -244,7 +349,7 @@ const Dashboard = () => {
 
               {/* Dropdown */}
               {openYear && (
-                <div className="absolute z-20 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md">
+                <div className="absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
                   {yearOptions.map((y) => (
                     <div
                       key={y}
@@ -296,6 +401,17 @@ const Dashboard = () => {
                 {m}
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+      <div className="px-5 py-3 border border-gray-300 rounded-md">
+        <div className="flex justify-between">
+          <h2 className="font-semibold text-lg">What to do Today?</h2>
+          <div
+            onClick={() => toast("FarmBot AI coming soon")}
+            className="text-white bg-[#166831] px-4 py-1 rounded-md cursor-pointer"
+          >
+            Ask FarmBot AI
           </div>
         </div>
       </div>
