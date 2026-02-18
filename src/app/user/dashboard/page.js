@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const [dashboard, setDashboard] = useState(null);
-  const [loadingDashboard, setLoadingDashboard] = useState(false);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [currentTime, setCurrentTime] = useState(null);
   const [weather, setWeather] = useState(null);
   const currentYear = new Date().getFullYear();
@@ -44,6 +44,51 @@ const Dashboard = () => {
     }
   };
 
+  const generateTodayAdvice = async () => {
+    try {
+      if (!weather || !activeCrop) {
+        toast.error("Weather or crop not ready");
+        return;
+      }
+      const res = await axios.post(
+        "/api/dashboard/today",
+        {
+          cropIndex: selectedCropIndex,
+
+          lang: "en-IN",
+
+          date: new Date().toISOString(),
+
+          crop: {
+            name: activeCrop.name,
+            startDate: activeCrop.startDate,
+            harvestDays: activeCrop.harvestDays,
+            daysRemaining: activeCrop.daysRemaining,
+            progress: activeCrop.progress,
+          },
+
+          weather: {
+            temp: weather.main.temp,
+            humidity: weather.main.humidity,
+            windSpeed: weather.wind.speed,
+            condition: weather.weather[0].description,
+            location: `${weather.name}, ${weather.sys.country}`,
+          },
+
+          disease: activeCrop.health ?? null,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      toast.success("Today's task generated!");
+      fetchDashboard();
+    } catch (err) {
+      toast.error("Failed to generate today task");
+    }
+  };
+
   useEffect(() => {
     fetchWeather();
     fetchDashboard();
@@ -54,13 +99,12 @@ const Dashboard = () => {
 
     const blocks = [];
 
-    const yearStart = new Date(year, 0, 1); // Jan 1
-    const yearEnd = new Date(year, 11, 31); // Dec 31
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31);
 
     let current = new Date(yearStart);
     let prevMonth = current.getMonth();
 
-    // Align Jan 1 to Sunday
     const startWeekday = current.getDay();
     for (let i = 0; i < startWeekday; i++) {
       blocks.push({ empty: true });
@@ -69,7 +113,6 @@ const Dashboard = () => {
     while (current <= yearEnd) {
       const month = current.getMonth();
 
-      // 🔹 Month gap (one full column)
       if (month !== prevMonth) {
         for (let i = 0; i < 7; i++) {
           blocks.push({ monthGap: true });
@@ -77,7 +120,6 @@ const Dashboard = () => {
         prevMonth = month;
       }
 
-      // Crop progress calculation
       const cropStart = new Date(cropStartDate);
       cropStart.setHours(0, 0, 0, 0);
       const cropEnd = new Date(cropStart);
@@ -216,45 +258,62 @@ const Dashboard = () => {
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
           <h2>Crop Progress</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold">
-              {activeCrop?.progress ?? "--"}%
-            </p>
-            <p className="text-sm">
-              Day{" "}
-              {activeCrop?.daysRemaining !== undefined
-                ? activeCrop.harvestDays - activeCrop.daysRemaining
-                : "--"}{" "}
-              of {activeCrop?.harvestDays ?? "--"}
-            </p>
+            {loadingDashboard ? (
+              <div className="w-16 h-[34.5px] bg-gray-200 rounded-md animate-pulse" />
+            ) : (
+              <p className="text-3xl font-bold">{activeCrop?.progress ?? 0}%</p>
+            )}
+            {loadingDashboard ? (
+              <div className="w-40 h-4 bg-gray-200 rounded-md animate-pulse mt-2" />
+            ) : (
+              <p className="text-sm">
+                Day {activeCrop.harvestDays - activeCrop.daysRemaining} of{" "}
+                {activeCrop.harvestDays}
+              </p>
+            )}
           </div>
         </div>
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
           <h2>Days Remaining</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold">
-              {activeCrop?.daysRemaining ?? "--"}{" "}
-              <span className="text-lg font-bold">Days</span>
-            </p>
-            <p className="text-sm">
-              Harvest:{" "}
-              {activeCrop?.harvestDate
-                ? new Date(activeCrop.harvestDate).toDateString()
-                : "--"}
-            </p>
+            {loadingDashboard ? (
+              <div className="w-20 h-[34.5px] bg-gray-200 rounded-md animate-pulse" />
+            ) : (
+              <p className="text-3xl font-bold">
+                {activeCrop?.daysRemaining ?? 0}
+                <span className="text-lg font-bold"> Days</span>
+              </p>
+            )}
+            {loadingDashboard ? (
+              <div className="w-44 h-4 bg-gray-200 rounded-md animate-pulse mt-2" />
+            ) : (
+              <p className="text-sm">
+                Harvest: {new Date(activeCrop.harvestDate).toDateString()}
+              </p>
+            )}
           </div>
         </div>
         <div className="h-[120px] flex flex-col gap-[17px] px-4 py-2 border border-gray-300 rounded-md">
           <h2>Crop Health</h2>
           <div className="space-y-1">
-            <p className="text-2xl font-bold truncate">
-              {activeCrop?.health?.result ?? "No Scan"}
-            </p>
-            <p className="text-sm">
-              Confidence:{" "}
-              {activeCrop?.health?.confidence
-                ? `${Math.round(activeCrop.health.confidence)}%`
-                : "--"}
-            </p>
+            {loadingDashboard ? (
+              <>
+                <div className="w-44 h-6 bg-gray-200 rounded-md animate-pulse" />
+                <div className="w-24 h-4 bg-gray-200 rounded-md animate-pulse mt-3" />
+              </>
+            ) : (
+              <>
+                <p className="text-2xl font-bold truncate">
+                  {activeCrop?.health?.result ?? "No Scan"}
+                </p>
+                <p className="text-sm">
+                  Confidence:{" "}
+                  {activeCrop?.health?.confidence
+                    ? `${Math.round(activeCrop.health.confidence)}%`
+                    : "—"}
+                </p>
+              </>
+            )}
           </div>
         </div>
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
@@ -270,7 +329,6 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <p className="font-medium">Plant Name</p>
 
-            {/* Crop Dropdown */}
             <div className="relative">
               <div
                 onClick={() => setOpenCrop((v) => !v)}
@@ -320,9 +378,12 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-5">
-            <p>Total Days: {harvestDays}</p>
+            {loadingDashboard ? (
+              <div className="w-24 h-4 bg-gray-200 rounded-md animate-pulse" />
+            ) : (
+              <p>Total Days: {harvestDays}</p>
+            )}
             <div className="relative">
-              {/* Selected year display */}
               <div
                 onClick={() => setOpenYear((v) => !v)}
                 className="flex justify-between items-center gap-4 px-2 py-0.5 border border-gray-300 rounded-md cursor-pointer
@@ -347,7 +408,6 @@ const Dashboard = () => {
                 </svg>
               </div>
 
-              {/* Dropdown */}
               {openYear && (
                 <div className="absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
                   {yearOptions.map((y) => (
@@ -370,18 +430,24 @@ const Dashboard = () => {
         </div>
         <div className="space-y-2">
           <div className="grid grid-rows-7 grid-flow-col gap-1">
-            {heatmapDays.map((d, i) => (
-              <div
-                key={i}
-                title={d.date ? d.date.toDateString() : ""}
-                className={`w-3 h-3 rounded-sm ${
-                  d.monthGap || d.empty ? "bg-transparent" : d.color
-                }`}
-              />
-            ))}
+            {loadingDashboard
+              ? Array.from({ length: 455 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-3 h-3 rounded-sm bg-gray-200 animate-pulse"
+                  />
+                ))
+              : heatmapDays.map((d, i) => (
+                  <div
+                    key={i}
+                    title={d.date ? d.date.toDateString() : ""}
+                    className={`w-3 h-3 rounded-sm ${
+                      d.monthGap || d.empty ? "bg-transparent" : d.color
+                    }`}
+                  />
+                ))}
           </div>
 
-          {/* MONTH LABELS (BOTTOM) */}
           <div className="flex text-xs text-gray-400 pl-1">
             {[
               "Jan",
@@ -404,16 +470,38 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <div className="px-5 py-3 border border-gray-300 rounded-md">
-        <div className="flex justify-between">
+      <div className="px-5 py-3 border border-gray-300 rounded-md space-y-3">
+        <div className="flex justify-between items-center">
           <h2 className="font-semibold text-lg">What to do Today?</h2>
           <div
-            onClick={() => toast("FarmBot AI coming soon")}
+            onClick={generateTodayAdvice}
             className="text-white bg-[#166831] px-4 py-1 rounded-md cursor-pointer"
           >
             Ask FarmBot AI
           </div>
         </div>
+        {loadingDashboard ? (
+          <div className="space-y-2">
+            <div className="w-full h-4 bg-gray-200 animate-pulse rounded" />
+            <div className="w-3/4 h-4 bg-gray-200 animate-pulse rounded" />
+          </div>
+        ) : activeCrop?.todayAdvice ? (
+          <div className="bg-green-50 border border-green-200 rounded-md p-4">
+            <p className="text-green-900 font-medium">🌱 Today’s Task</p>
+            <p className="text-sm text-gray-700 mt-1">
+              {activeCrop.todayAdvice.content}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-gray-50 border border-dashed border-gray-300 rounded-md p-4">
+            <p className="text-gray-500 text-sm">
+              No tasks generated for today.
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Check again later or ask FarmBot AI 🌤️
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
