@@ -72,6 +72,10 @@ const Order = () => {
   }, [active, search, itemStatus]);
 
   useEffect(() => {
+    setItemStatus("");
+  }, [active]);
+
+  useEffect(() => {
     const activeIndex = tabs.indexOf(active);
     const activeTab = tabRefs.current[activeIndex];
 
@@ -137,46 +141,48 @@ const Order = () => {
               <img src="/images/user/store/search.png" alt="" className="w-5" />
             </div>
 
-            <div
-              ref={dropdownRef}
-              className="relative px-2 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[150px]"
-              onClick={() => setStatusOpen((prev) => !prev)}
-            >
-              <p className="text-sm font-medium capitalize">
-                {itemStatusOptions.find((s) => s.value === itemStatus)?.label ||
-                  "All Status"}
-              </p>
+            {active === "Orders" && (
+              <div
+                ref={dropdownRef}
+                className="relative px-2 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[150px]"
+                onClick={() => setStatusOpen((prev) => !prev)}
+              >
+                <p className="text-sm font-medium capitalize">
+                  {itemStatusOptions.find((s) => s.value === itemStatus)
+                    ?.label || "All Status"}
+                </p>
 
-              <img
-                className={`w-3 transition-transform duration-200 ${
-                  statusOpen ? "rotate-180" : ""
-                }`}
-                src="/images/landing/dropdown.png"
-                alt=""
-              />
+                <img
+                  className={`w-3 transition-transform duration-200 ${
+                    statusOpen ? "rotate-180" : ""
+                  }`}
+                  src="/images/landing/dropdown.png"
+                  alt=""
+                />
 
-              {statusOpen && (
-                <div className="absolute top-[110%] left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
-                  {itemStatusOptions.map((status) => (
-                    <div
-                      key={status.value}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setItemStatus(status.value);
-                        setStatusOpen(false);
-                      }}
-                      className={`px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer capitalize rounded-md ${
-                        itemStatus === status.value
-                          ? "bg-gray-100 font-medium"
-                          : ""
-                      }`}
-                    >
-                      {status.label}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                {statusOpen && (
+                  <div className="absolute top-[110%] left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                    {itemStatusOptions.map((status) => (
+                      <div
+                        key={status.value}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setItemStatus(status.value);
+                          setStatusOpen(false);
+                        }}
+                        className={`px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer capitalize rounded-md ${
+                          itemStatus === status.value
+                            ? "bg-gray-100 font-medium"
+                            : ""
+                        }`}
+                      >
+                        {status.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {loading ? (

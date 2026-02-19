@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [openYear, setOpenYear] = useState(false);
   const [selectedCropIndex, setSelectedCropIndex] = useState(0);
   const [openCrop, setOpenCrop] = useState(false);
+  const [todayAdvice, setTodayAdvice] = useState("");
 
   const activeCrop = dashboard?.crops?.[selectedCropIndex];
 
@@ -81,6 +82,7 @@ const Dashboard = () => {
           withCredentials: true,
         },
       );
+      setTodayAdvice(res.data.advice);
 
       toast.success("Today's task generated!");
       fetchDashboard();
@@ -151,6 +153,19 @@ const Dashboard = () => {
 
     return blocks;
   }, [year, cropStartDate, harvestDays]);
+
+  const isTodayGenerated = useMemo(() => {
+    if (!activeCrop?.todayAdvice?.generatedForDate) return false;
+
+    const generated = new Date(activeCrop.todayAdvice.generatedForDate);
+    const today = new Date();
+
+    return (
+      generated.getFullYear() === today.getFullYear() &&
+      generated.getMonth() === today.getMonth() &&
+      generated.getDate() === today.getDate()
+    );
+  }, [activeCrop]);
 
   const yearOptions = useMemo(
     () => [currentYear - 1, currentYear, currentYear + 1],
@@ -317,10 +332,10 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
-          <h2>Total Predictions</h2>
+          <h2>Total Plants</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold">0</p>
-            <p className="text-sm">Across all AI models</p>
+            <p className="text-3xl font-bold">{dashboard?.crops?.length ?? 0}</p>
+            <p className="text-sm">Currently monitored</p>
           </div>
         </div>
       </div>
@@ -473,12 +488,14 @@ const Dashboard = () => {
       <div className="px-5 py-3 border border-gray-300 rounded-md space-y-3">
         <div className="flex justify-between items-center">
           <h2 className="font-semibold text-lg">What to do Today?</h2>
-          <div
-            onClick={generateTodayAdvice}
-            className="text-white bg-[#166831] px-4 py-1 rounded-md cursor-pointer"
-          >
-            Ask FarmBot AI
-          </div>
+          {!isTodayGenerated && (
+            <div
+              onClick={generateTodayAdvice}
+              className="text-white bg-[#166831] px-4 py-1 rounded-md cursor-pointer"
+            >
+              Ask FarmBot AI
+            </div>
+          )}
         </div>
         {loadingDashboard ? (
           <div className="space-y-2">
@@ -486,19 +503,21 @@ const Dashboard = () => {
             <div className="w-3/4 h-4 bg-gray-200 animate-pulse rounded" />
           </div>
         ) : activeCrop?.todayAdvice ? (
-          <div className="bg-green-50 border border-green-200 rounded-md p-4">
-            <p className="text-green-900 font-medium">🌱 Today’s Task</p>
-            <p className="text-sm text-gray-700 mt-1">
-              {activeCrop.todayAdvice.content}
-            </p>
+          <div className="p-2">
+            <div
+              className="space-y-1"
+              dangerouslySetInnerHTML={{
+                __html: todayAdvice || activeCrop?.todayAdvice?.content,
+              }}
+            />
           </div>
         ) : (
-          <div className="bg-gray-50 border border-dashed border-gray-300 rounded-md p-4">
-            <p className="text-gray-500 text-sm">
-              No tasks generated for today.
+          <div className="text-center py-4">
+            <p className="text-xl font-medium">
+              No Tasks generated for today.
             </p>
-            <p className="text-xs text-gray-400 mt-1">
-              Check again later or ask FarmBot AI 🌤️
+            <p className="text-sm text-gray-400 mt-1">
+              Click "Ask FarmBot AI" and get what to do Today
             </p>
           </div>
         )}

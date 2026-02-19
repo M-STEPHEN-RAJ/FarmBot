@@ -81,7 +81,10 @@ const SettingsSidebar = () => {
           </div>
 
           <div className="space-y-0.5 pr-2">
-            <div className="px-2 py-2 flex items-center gap-3 hover:bg-gray-100 rounded-md cursor-pointer">
+            <div 
+              onClick={() => router.push("/user/settings/support")}
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-gray-100 ${pathname.includes("support") ? "bg-gray-200 hover:bg-gray-300" : ""} rounded-md cursor-pointer`}
+            >
               <img
                 src="/images/user/settings/support.png"
                 alt=""

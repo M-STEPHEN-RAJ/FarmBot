@@ -33,33 +33,17 @@ const Order = () => {
   ];
 
   const emptyStateContent = {
-    confirmed: {
-      title: "No confirmed orders",
-      description: "No orders have been confirmed yet.",
+    placed: {
+      title: "No placed orders",
+      description: "You haven’t placed any orders yet.",
     },
-    processing: {
-      title: "No processing orders",
-      description: "No orders are being processed.",
-    },
-    shipped: {
-      title: "No shipped orders",
-      description: "No orders have been shipped yet.",
-    },
-    out_for_delivery: {
-      title: "No orders out for delivery",
-      description: "No orders are currently out for delivery.",
-    },
-    delivered: {
-      title: "No delivered orders",
-      description: "You haven’t delivered any orders yet.",
+    completed: {
+      title: "No completed orders",
+      description: "No orders have been completed yet.",
     },
     cancelled: {
       title: "No cancelled orders",
       description: "You haven’t cancelled any orders.",
-    },
-    returned: {
-      title: "No returned orders",
-      description: "No orders have been returned.",
     },
   };
 
@@ -88,6 +72,11 @@ const Order = () => {
   useEffect(() => {
     fetchOrders();
   }, [active, search, orderStatus]);
+
+  useEffect(() => {
+    setActive("");
+    setSearch("");
+  }, [orderStatus]);
 
   useEffect(() => {
     const activeIndex = tabs.findIndex((tab) => tab.value === orderStatus);
@@ -132,9 +121,9 @@ const Order = () => {
               <p
                 key={tab.value}
                 ref={(el) => (tabRefs.current[index] = el)}
-                onClick={() => setOrderStatus(tab.value)} 
+                onClick={() => setOrderStatus(tab.value)}
                 className={`cursor-pointer pb-2 px-7 transition-colors duration-200 ${
-                  orderStatus === tab.value  
+                  orderStatus === tab.value
                     ? "text-[#EB3D3F] font-semibold"
                     : "text-gray-500 hover:text-gray-600"
                 }`}
@@ -156,44 +145,47 @@ const Order = () => {
               />
               <img src="/images/user/store/search.png" alt="" className="w-5" />
             </div>
-            <div
-              ref={dropdownRef}
-              className="relative px-2 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[150px]"
-              onClick={() => setStatusOpen((prev) => !prev)}
-            >
-              <p className="text-sm font-medium capitalize">
-                {orderFlowOptions.find((s) => s.value === active)?.label}
-              </p>
+            {orderStatus === "placed" && (
+              <div
+                ref={dropdownRef}
+                className="relative px-2 py-2 flex justify-between items-center border border-gray-300 rounded-md cursor-pointer w-[150px]"
+                onClick={() => setStatusOpen((prev) => !prev)}
+              >
+                <p className="text-sm font-medium capitalize">
+                  {orderFlowOptions.find((s) => s.value === active)?.label ||
+                    "All"}
+                </p>
 
-              <img
-                className={`w-3 transition-transform duration-200 ${
-                  statusOpen ? "rotate-180" : ""
-                }`}
-                src="/images/landing/dropdown.png"
-                alt=""
-              />
+                <img
+                  className={`w-3 transition-transform duration-200 ${
+                    statusOpen ? "rotate-180" : ""
+                  }`}
+                  src="/images/landing/dropdown.png"
+                  alt=""
+                />
 
-              {statusOpen && (
-                <div className="absolute top-[110%] left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
-                  {orderFlowOptions.map((status) => (
-                    <div
-                      key={status.value}
-                      onClick={() => {
-                        setActive(status.value);
-                        setStatusOpen(false);
-                      }}
-                      className={`px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer capitalize rounded-md ${
-                        active === status.value
-                          ? "bg-gray-100 font-medium"
-                          : ""
-                      }`}
-                    >
-                      {status.label}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                {statusOpen && (
+                  <div className="absolute top-[110%] left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                    {orderFlowOptions.map((status) => (
+                      <div
+                        key={status.value}
+                        onClick={() => {
+                          setActive(status.value);
+                          setStatusOpen(false);
+                        }}
+                        className={`px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer capitalize rounded-md ${
+                          active === status.value
+                            ? "bg-gray-100 font-medium"
+                            : ""
+                        }`}
+                      >
+                        {status.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {loading ? (
@@ -209,10 +201,10 @@ const Order = () => {
               />
               <div className="text-center">
                 <p className="text-lg font-medium">
-                  {emptyStateContent[active].title}
+                  {emptyStateContent[orderStatus]?.title}
                 </p>
                 <p className="text-sm mt-2">
-                  {emptyStateContent[active].description}
+                  {emptyStateContent[orderStatus]?.description}
                 </p>
               </div>
             </div>

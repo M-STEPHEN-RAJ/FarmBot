@@ -123,9 +123,24 @@ export async function GET(req) {
       query["items.name"] = { $regex: search, $options: "i" };
     }
 
-    const orders = await Order.find(query)
+    let orders = await Order.find(query)
       .populate("items.sellerId", "name")
       .sort({ createdAt: -1 });
+
+    if (itemStatus) {
+      orders = orders
+        .map((order) => {
+          const filteredItems = order.items.filter(
+            (item) => item.status === itemStatus,
+          );
+
+          return {
+            ...order._doc,
+            items: filteredItems,
+          };
+        })
+        .filter((order) => order.items.length > 0);
+    }
 
     return NextResponse.json({ orders });
   } catch (err) {
