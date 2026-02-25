@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
+import ReviewModal from "@/app/components/user/store/Modal/ReviewModal";
 
 const ProductDetails = () => {
   const menuRef = useRef(null);
@@ -20,6 +21,9 @@ const ProductDetails = () => {
   const [zoomImage, setZoomImage] = useState(null);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingReview, setEditingReview] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,7 +61,7 @@ const ProductDetails = () => {
       const res = await axios.post(
         `${API}/cart`,
         { productId: product._id, quantity },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       toast.success("Added to cart!");
@@ -79,6 +83,33 @@ const ProductDetails = () => {
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to delete review!");
+    }
+  };
+
+  const handleSubmitReview = async (formData) => {
+    try {
+      if (editingReview) {
+        await axios.patch(
+          `${API}/store/review/${id}/${editingReview._id}`,
+          formData,
+          { withCredentials: true },
+        );
+
+        toast.success("Review updated successfully!");
+      } else {
+        await axios.post(`${API}/store/review/${id}`, formData, {
+          withCredentials: true,
+        });
+
+        toast.success("Review submitted successfully!");
+      }
+
+      setShowModal(false);
+      setEditingReview(null);
+      fetchProduct();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to submit review!");
     }
   };
 
@@ -123,7 +154,7 @@ const ProductDetails = () => {
       await axios.post(
         `${API}/store/review/${id}/${reviewId}/react`,
         { type },
-        { withCredentials: true }
+        { withCredentials: true },
       );
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to react!");
@@ -141,7 +172,7 @@ const ProductDetails = () => {
       await axios.post(
         `${API}/store/review/${id}/${reviewId}/report`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       toast.success("Review reported!");
@@ -151,7 +182,9 @@ const ProductDetails = () => {
   };
 
   const handleEdit = (review) => {
-    toast.error("Edit feature not implemented yet");
+    setEditingReview(review);
+    setShowModal(true);
+    setActiveMenu(null);
   };
 
   useEffect(() => {
@@ -390,7 +423,7 @@ const ProductDetails = () => {
               const ratingCounts = [5, 4, 3, 2, 1].map((star) => ({
                 star,
                 count: product.reviews.filter(
-                  (r) => Math.round(r.rating) === star
+                  (r) => Math.round(r.rating) === star,
                 ).length,
               }));
 
@@ -442,7 +475,16 @@ const ProductDetails = () => {
 
           <div className="space-y-5">
             <p className="text-sm ">Share your thoughts with other customers</p>
-            <button className="w-[95%] py-2 text-sm font-medium text-white bg-[#166831] rounded-md cursor-pointer">
+            <button
+              onClick={() => {
+                if (!currentUser) {
+                  toast.error("Please login to write a review!");
+                  return;
+                }
+                setShowModal(true);
+              }}
+              className="w-[95%] py-2 text-sm font-medium text-white bg-[#166831] rounded-md cursor-pointer"
+            >
               Write a Product Review
             </button>
           </div>
@@ -489,7 +531,7 @@ const ProductDetails = () => {
                 .filter((review) =>
                   filterRating
                     ? Math.round(review.rating) === filterRating
-                    : true
+                    : true,
                 )
                 .sort((a, b) => {
                   if (reviewSort === "Top") {
@@ -521,7 +563,7 @@ const ProductDetails = () => {
                           className="p-1.5 hover:bg-gray-200 rounded-full cursor-pointer"
                           onClick={() =>
                             setActiveMenu(
-                              activeMenu === review._id ? null : review._id
+                              activeMenu === review._id ? null : review._id,
                             )
                           }
                         >
@@ -607,7 +649,7 @@ const ProductDetails = () => {
                               day: "numeric",
                               month: "short",
                               year: "numeric",
-                            }
+                            },
                           )}
                         </p>
                         <p className="text-sm text-gray-600">
@@ -696,6 +738,16 @@ const ProductDetails = () => {
             className="max-w-[90%] max-h-[90%] object-contain rounded-md shadow-lg"
           />
         </div>
+      )}
+
+      {showModal && (
+        <ReviewModal
+          review={editingReview}
+          onClose={() => {
+            setShowModal(false);
+          }}
+          onSubmit={handleSubmitReview}
+        />
       )}
     </div>
   );
