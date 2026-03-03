@@ -2,6 +2,8 @@
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import AddCropModal from "@/app/components/user/dashboard/Modal/AddCropModal";
+import { API } from "@/app/utils/api";
 
 const Dashboard = () => {
   const [dashboard, setDashboard] = useState(null);
@@ -14,11 +16,35 @@ const Dashboard = () => {
   const [selectedCropIndex, setSelectedCropIndex] = useState(0);
   const [openCrop, setOpenCrop] = useState(false);
   const [todayAdvice, setTodayAdvice] = useState("");
+  const [lang, setLang] = useState("en-IN");
+  const [langLoading, setLangLoading] = useState(true);
+
+  const [openAddModal, setOpenAddModal] = useState(false);
 
   const activeCrop = dashboard?.crops?.[selectedCropIndex];
 
   const cropStartDate = activeCrop?.startDate;
   const harvestDays = activeCrop?.harvestDays;
+
+  const fetchCurrentUser = async () => {
+    try {
+      setLangLoading(true);
+
+      const res = await axios.get(`${API}/me`, {
+        withCredentials: true,
+      });
+
+      if (res.data?.user?.preferredLanguage === "ta") {
+        setLang("ta-IN");
+      } else {
+        setLang("en-IN");
+      }
+    } catch (err) {
+      console.error("Failed to fetch user language");
+    } finally {
+      setLangLoading(false);
+    }
+  };
 
   const fetchWeather = async () => {
     try {
@@ -45,6 +71,20 @@ const Dashboard = () => {
     }
   };
 
+  const updateLanguage = async (newLang) => {
+    try {
+      await axios.patch(
+        `${API}/me`,
+        {
+          preferredLanguage: newLang === "ta-IN" ? "ta" : "en",
+        },
+        { withCredentials: true },
+      );
+    } catch (err) {
+      console.error("Failed to update language", err);
+    }
+  };
+
   const generateTodayAdvice = async () => {
     try {
       if (!weather || !activeCrop) {
@@ -56,7 +96,7 @@ const Dashboard = () => {
         {
           cropIndex: selectedCropIndex,
 
-          lang: "en-IN",
+          lang,
 
           date: new Date().toISOString(),
 
@@ -94,6 +134,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchWeather();
     fetchDashboard();
+    fetchCurrentUser();
   }, []);
 
   const heatmapDays = useMemo(() => {
@@ -334,7 +375,9 @@ const Dashboard = () => {
         <div className="h-[120px] flex flex-col gap-3 px-4 py-2 border border-gray-300 rounded-md">
           <h2>Total Plants</h2>
           <div className="space-y-1">
-            <p className="text-3xl font-bold">{dashboard?.crops?.length ?? 0}</p>
+            <p className="text-3xl font-bold">
+              {dashboard?.crops?.length ?? 0}
+            </p>
             <p className="text-sm">Currently monitored</p>
           </div>
         </div>
@@ -350,7 +393,9 @@ const Dashboard = () => {
                 className="flex items-center justify-between gap-4 px-3 py-0.5 border border-gray-300 rounded-md cursor-pointer
         hover:bg-gray-50 select-none min-w-[120px]"
               >
-                <p className="truncate">{activeCrop?.name ?? "Select Crop"}</p>
+                <p className="truncate capitalize">
+                  {activeCrop?.name ?? "Select Crop"}
+                </p>
 
                 <svg
                   className={`w-4 h-4 transition-transform ${
@@ -378,7 +423,7 @@ const Dashboard = () => {
                         setSelectedCropIndex(idx);
                         setOpenCrop(false);
                       }}
-                      className={`px-4 py-2 cursor-pointer text-sm rounded-md
+                      className={`px-4 py-2 cursor-pointer text-sm rounded-md capitalize
               ${
                 idx === selectedCropIndex
                   ? "hover:bg-gray-100 font-semibold"
@@ -390,6 +435,13 @@ const Dashboard = () => {
                   ))}
                 </div>
               )}
+            </div>
+
+            <div
+              onClick={() => setOpenAddModal(true)}
+              className="flex justify-center items-center h-6 w-6 text-lg font-medium bg-gray-100 hover:bg-gray-200 rounded-md cursor-pointer"
+            >
+              +
             </div>
           </div>
           <div className="flex items-center gap-5">
@@ -488,14 +540,40 @@ const Dashboard = () => {
       <div className="px-5 py-3 border border-gray-300 rounded-md space-y-3">
         <div className="flex justify-between items-center">
           <h2 className="font-semibold text-lg">What to do Today?</h2>
-          {!isTodayGenerated && (
-            <div
-              onClick={generateTodayAdvice}
-              className="text-white bg-[#166831] px-4 py-1 rounded-md cursor-pointer"
-            >
-              Ask FarmBot AI
-            </div>
-          )}
+          <div className="flex gap-3">
+            {!isTodayGenerated && (
+              <>
+                <div
+                  onClick={() => {
+                    if (langLoading) return;
+
+                    const newLang = lang === "en-IN" ? "ta-IN" : "en-IN";
+                    setLang(newLang);
+                    updateLanguage(newLang);
+                  }}
+                  className={`w-8 h-8 flex justify-center items-center rounded-full cursor-pointer 
+  ${
+    langLoading
+      ? "bg-gray-100 animate-pulse hover:bg-gray-300"
+      : "hover:bg-gray-100"
+  }`}
+                >
+                  {!langLoading && (
+                    <p className="font-semibold">
+                      {lang === "en-IN" ? "en" : "த"}
+                    </p>
+                  )}
+                </div>
+
+                <div
+                  onClick={generateTodayAdvice}
+                  className="text-white bg-[#166831] px-4 py-1 rounded-md cursor-pointer"
+                >
+                  Ask FarmBot AI
+                </div>
+              </>
+            )}
+          </div>
         </div>
         {loadingDashboard ? (
           <div className="space-y-2">
@@ -513,15 +591,18 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-xl font-medium">
-              No Tasks generated for today.
-            </p>
+            <p className="text-xl font-medium">No Tasks generated for today.</p>
             <p className="text-sm text-gray-400 mt-1">
               Click "Ask FarmBot AI" and get what to do Today
             </p>
           </div>
         )}
       </div>
+      <AddCropModal
+        open={openAddModal}
+        onClose={() => setOpenAddModal(false)}
+        onSuccess={fetchDashboard}
+      />
     </div>
   );
 };

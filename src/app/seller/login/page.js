@@ -1,13 +1,12 @@
-"use client"
+"use client";
 import React, { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
 import SellerLoading from "@/app/components/common/SellerLoading";
 
 const SellerLogin = () => {
-
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -58,6 +57,12 @@ const SellerLogin = () => {
   const handleRegisterRedirect = () => {
     setLoading(true);
     router.push("/seller/register");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleLogin(e);
+    }
   };
 
   return (
@@ -121,6 +126,7 @@ const SellerLogin = () => {
                   id="password"
                   value={formData.password}
                   onChange={handleChange}
+                  onKeyDown={handleKeyDown}
                 />
                 <p className="text-right text-sm text-[#EB3D3F] font-semibold cursor-pointer mt-1">
                   Forgot Password?
@@ -129,7 +135,10 @@ const SellerLogin = () => {
             </div>
 
             <div className="space-y-4">
-              <button onClick={handleLogin} className="w-full bg-[#F57627] font-medium text-white py-1.5 rounded-md cursor-pointer">
+              <button
+                onClick={handleLogin}
+                className="w-full bg-[#F57627] font-medium text-white py-1.5 rounded-md cursor-pointer"
+              >
                 Login
               </button>
 

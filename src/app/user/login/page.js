@@ -33,7 +33,7 @@ const Login = () => {
 
       const res = await axios.post(`${API}/auth/login`, formData, {
         withCredentials: true,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
 
       if (res.status === 200) {
@@ -68,6 +68,12 @@ const Login = () => {
     router.push("/user/register");
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleLogin(e);
+    }
+  };
+
   return (
     <>
       {loading && <Loading />}
@@ -84,7 +90,11 @@ const Login = () => {
                 onClick={handleGoogleSignIn}
                 className="flex justify-center items-center gap-5 rounded-md py-2.5 border border-gray-300 cursor-pointer"
               >
-                <img src="/images/user/login/google.png" alt="" className="w-5" />
+                <img
+                  src="/images/user/login/google.png"
+                  alt=""
+                  className="w-5"
+                />
                 <p>Continue with Google</p>
               </div>
               <div className="flex justify-center items-center gap-5">
@@ -128,6 +138,7 @@ const Login = () => {
                   id="password"
                   value={formData.password}
                   onChange={handleChange}
+                  onKeyDown={handleKeyDown}
                 />
                 <p className="text-right text-sm text-[#166831] font-semibold cursor-pointer mt-1">
                   Forgot Password?
@@ -173,7 +184,11 @@ const Login = () => {
             />
           </div>
           <div className="flex items-center absolute top-5 right-5">
-            <img src="/images/user/login/logo.png" alt="" className="w-20 h-auto" />
+            <img
+              src="/images/user/login/logo.png"
+              alt=""
+              className="w-20 h-auto"
+            />
             <h2 className="text-white text-xl font-semibold">FarmBot</h2>
           </div>
 

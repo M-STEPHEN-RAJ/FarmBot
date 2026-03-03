@@ -63,7 +63,6 @@ export async function GET(req) {
           startDate: crop.startDate,
           harvestDays: totalDays,
 
-          // ✅ COMPUTED (NOW THEY WILL APPEAR)
           day,
           totalDays,
           progress,
@@ -128,7 +127,6 @@ export async function POST(req) {
       );
     }
 
-    // 🌱 FarmBot harvest knowledge
     const HARVEST_DAYS = {
       potato: 90,
       tomato: 75,

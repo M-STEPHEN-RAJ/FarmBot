@@ -5,6 +5,7 @@ import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
 import ReviewModal from "@/app/components/user/store/Modal/ReviewModal";
+import Loading from "@/app/components/common/Loading";
 
 const ProductDetails = () => {
   const menuRef = useRef(null);
@@ -201,7 +202,7 @@ const ProductDetails = () => {
     };
   }, []);
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (loading) return <Loading />;
 
   return (
     <div className="w-full max-w-[1150px] flex flex-col pr-4 py-4">
