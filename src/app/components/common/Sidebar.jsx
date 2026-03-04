@@ -118,6 +118,20 @@ const Sidebar = ({ loading, setLoading }) => {
                 Farm AI
               </div>
             </div>
+
+            <div
+              onClick={() => navigate("/user/scheme")}
+              className={`p-2 ${
+                isActive("/user/scheme")
+                  ? "bg-gray-100 hover:bg-gray-200"
+                  : "hover:bg-gray-100"
+              } rounded-md cursor-pointer group relative`}
+            >
+              <img src="/images/user/sidebar/scheme.png" alt="" className="w-6" />
+              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
+                Schemes
+              </div>
+            </div>
           </div>
         </div>
 

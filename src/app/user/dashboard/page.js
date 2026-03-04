@@ -323,8 +323,9 @@ const Dashboard = () => {
               <div className="w-40 h-4 bg-gray-200 rounded-md animate-pulse mt-2" />
             ) : (
               <p className="text-sm">
-                Day {activeCrop.harvestDays - activeCrop.daysRemaining} of{" "}
-                {activeCrop.harvestDays}
+                {activeCrop
+                  ? `Day ${activeCrop.harvestDays - activeCrop.daysRemaining} of ${activeCrop.harvestDays}`
+                  : "No crop selected"}
               </p>
             )}
           </div>
@@ -344,7 +345,9 @@ const Dashboard = () => {
               <div className="w-44 h-4 bg-gray-200 rounded-md animate-pulse mt-2" />
             ) : (
               <p className="text-sm">
-                Harvest: {new Date(activeCrop.harvestDate).toDateString()}
+                {activeCrop?.harvestDate
+                  ? `Harvest: ${new Date(activeCrop.harvestDate).toDateString()}`
+                  : "Harvest date not available"}
               </p>
             )}
           </div>

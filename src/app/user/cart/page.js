@@ -7,6 +7,7 @@ import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
 import AddressModal from "@/app/components/user/cart/Modal/AddressModal";
+import Loading from "@/app/components/common/Loading";
 
 const Cart = () => {
   const itemRefs = useRef({});
@@ -228,7 +229,7 @@ const Cart = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading</p>;
+    return <Loading />;
   }
 
   if (!cart || !cart.items.length) {
