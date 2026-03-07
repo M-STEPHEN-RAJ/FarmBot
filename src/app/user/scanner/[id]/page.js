@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
@@ -11,8 +13,61 @@ const Scanner = () => {
   const params = useParams();
   const selectedScanId = params?.id;
 
+  const pdfRef = useRef(null);
+
   const [scanDetails, setScanDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
+  const downloadPDF = async () => {
+    if (!pdfRef.current) return;
+
+    const element = pdfRef.current;
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollY: -window.scrollY,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
+
+      onclone: (doc) => {
+        doc.querySelectorAll("*").forEach((el) => {
+          const style = window.getComputedStyle(el);
+
+          if (style.color.includes("lab")) el.style.color = "#000";
+          if (style.backgroundColor.includes("lab"))
+            el.style.backgroundColor = "#fff";
+          if (style.borderColor.includes("lab")) el.style.borderColor = "#ccc";
+        });
+      },
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth - 20;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let position = 0;
+    let heightLeft = imgHeight;
+
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 10, position + 10, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`scan-${scanDetails?.plantName || "result"}.pdf`);
+  };
 
   useEffect(() => {
     const fetchScanDetails = async () => {
@@ -40,8 +95,15 @@ const Scanner = () => {
   }, [selectedScanId]);
 
   return (
-    <div className="w-full h-screen flex overflow-hidden">
+    <div className="relative w-full h-screen flex overflow-hidden">
       <ScannerSidebar selectedScanId={selectedScanId} />
+
+      <div
+        onClick={downloadPDF}
+        className="absolute bottom-10 right-10 flex items-center justify-between p-2 bg-[#166831] border border-gray-300 cursor-pointer rounded-full"
+      >
+        <img className="w-7" src="/images/user/scanner/download.png" alt="" />
+      </div>
 
       <div className="flex-1 flex flex-col overflow-y-auto p-4">
         {loadingDetails && (
@@ -71,7 +133,10 @@ const Scanner = () => {
         )}
 
         {scanDetails && !loadingDetails && (
-          <div className="w-full max-w-[850px] flex flex-col justify-center items-center gap-5 mx-auto">
+          <div
+            ref={pdfRef}
+            className="w-full max-w-[850px] flex flex-col justify-center items-center gap-5 mx-auto"
+          >
             <div className="w-full grid grid-cols-[350px_320px_1fr] gap-5 px-4 pt-1">
               <img
                 src={scanDetails.imageUrl}
@@ -130,7 +195,7 @@ const Scanner = () => {
                     );
                   })()}
                 </svg>
-              
+
                 <div className="absolute text-center">
                   <p className="text-lg font-medium text-[#166831]">
                     {scanDetails.confidence}%
@@ -143,7 +208,7 @@ const Scanner = () => {
               <div className="">
                 <p className="text-lg font-semibold">Explanation:</p>
                 <div
-                  className="text-gray-800 mt-3"
+                  className="text-gray-800 mt-3 leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: scanDetails.explanation }}
                 />
               </div>
