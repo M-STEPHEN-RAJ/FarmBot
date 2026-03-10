@@ -17,6 +17,7 @@ const Scanner = () => {
 
   const [scanDetails, setScanDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   const downloadPDF = async () => {
     if (!pdfRef.current) return;
@@ -69,6 +70,47 @@ const Scanner = () => {
     pdf.save(`scan-${scanDetails?.plantName || "result"}.pdf`);
   };
 
+  const handleSpeak = () => {
+    if (!scanDetails?.explanation) return;
+
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    const text = new DOMParser().parseFromString(
+      scanDetails.explanation,
+      "text/html",
+    ).body.textContent;
+
+    const tamilRegex = /[\u0B80-\u0BFF]/;
+
+    if (tamilRegex.test(text)) {
+      toast.error("Tamil voice not supported!");
+    }
+
+    const speech = new SpeechSynthesisUtterance(text);
+
+    speech.lang = "en-US";
+    speech.rate = 1;
+
+    speech.onend = () => {
+      setSpeaking(false);
+    };
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(speech);
+
+    setSpeaking(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
   useEffect(() => {
     const fetchScanDetails = async () => {
       if (!selectedScanId) {
@@ -82,7 +124,6 @@ const Scanner = () => {
           withCredentials: true,
         });
         setScanDetails(res.data);
-        console.log(res.data);
       } catch (err) {
         console.error("Failed to fetch scan details:", err);
         toast.error("Failed to load scan details!");
@@ -103,6 +144,21 @@ const Scanner = () => {
         className="absolute bottom-10 right-10 flex items-center justify-between p-2 bg-[#166831] border border-gray-300 cursor-pointer rounded-full"
       >
         <img className="w-7" src="/images/user/scanner/download.png" alt="" />
+      </div>
+
+      <div
+        onClick={handleSpeak}
+        className={`absolute bottom-25 right-10 flex items-center justify-between p-3 ${speaking ? "bg-[#166831]" : "bg-white border border-[#166831]"} border border-gray-300 cursor-pointer rounded-full`}
+      >
+        <img
+          className="w-6"
+          src={
+            speaking
+              ? "/images/user/scanner/speaker-active.png"
+              : "/images/user/scanner/speaker.png"
+          }
+          alt=""
+        />
       </div>
 
       <div className="flex-1 flex flex-col overflow-y-auto p-4">

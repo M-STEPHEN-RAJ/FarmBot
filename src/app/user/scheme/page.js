@@ -1,7 +1,10 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 const Scheme = () => {
+  const router = useRouter();
+
   const [schemes, setSchemes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -65,7 +68,12 @@ const Scheme = () => {
                 className="w-25 h-25 object-cover mb-2 rounded-md"
               />
               <div className="flex flex-col space-y-2">
-                <h2 className="font-semibold text-lg hover:underline cursor-pointer">{scheme.title}</h2>
+                <h2
+                  onClick={() => router.push(`/user/scheme/${scheme._id}`)}
+                  className="font-semibold text-lg hover:underline cursor-pointer"
+                >
+                  {scheme.title}
+                </h2>
                 <p className="text-gray-500 text-sm">
                   {scheme.shortDescription}
                 </p>

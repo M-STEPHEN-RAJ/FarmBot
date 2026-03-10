@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Cart from "../models/Cart.js";
+import Order from "../models/Order.js";
 import { uploadImage } from "@/app/utils/cloudinary.js";
 
 export const updateProfile = async (request) => {
@@ -105,7 +107,13 @@ export const getCurrentUser = async (request) => {
       });
     }
 
-    return new Response(JSON.stringify({ user }), {
+    const cart = await Cart.findOne({ userId: decoded.id });
+
+    const cartCount = cart?.items?.length || 0;
+
+    const orderCount = await Order.countDocuments({ userId: decoded.id });
+
+    return new Response(JSON.stringify({ user, cartCount, orderCount }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

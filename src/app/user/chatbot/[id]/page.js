@@ -195,7 +195,6 @@ const ChatBot = () => {
     textarea.style.height = Math.min(textarea.scrollHeight, 5 * 24) + "px";
   };
 
-  /** INITIAL FETCH */
   useEffect(() => {
     fetchCurrentUser();
     if (chatId) fetchMessages();

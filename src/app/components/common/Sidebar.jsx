@@ -10,6 +10,8 @@ const Sidebar = ({ loading, setLoading }) => {
   const pathname = usePathname();
 
   const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
 
   const isActive = (route) => pathname.startsWith(route);
 
@@ -26,6 +28,8 @@ const Sidebar = ({ loading, setLoading }) => {
       });
 
       setUser(res.data.user);
+      setCartCount(res.data.cartCount);
+      setOrderCount(res.data.orderCount);
     } catch (err) {
       console.error(err);
     } finally {
@@ -58,7 +62,11 @@ const Sidebar = ({ loading, setLoading }) => {
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
-              <img src="/images/user/sidebar/dashboard.png" alt="" className="w-6" />
+              <img
+                src="/images/user/sidebar/dashboard.png"
+                alt=""
+                className="w-6"
+              />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Dashboard
               </div>
@@ -72,7 +80,11 @@ const Sidebar = ({ loading, setLoading }) => {
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
-              <img src="/images/user/sidebar/farmstore.png" alt="" className="w-6" />
+              <img
+                src="/images/user/sidebar/farmstore.png"
+                alt=""
+                className="w-6"
+              />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm Store
               </div>
@@ -85,7 +97,11 @@ const Sidebar = ({ loading, setLoading }) => {
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
-              <img src="/images/user/sidebar/farmguide.png" alt="" className="w-6" />
+              <img
+                src="/images/user/sidebar/farmguide.png"
+                alt=""
+                className="w-6"
+              />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm Guide
               </div>
@@ -99,7 +115,11 @@ const Sidebar = ({ loading, setLoading }) => {
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
-              <img src="/images/user/sidebar/farmdoc.png" alt="" className="w-6" />
+              <img
+                src="/images/user/sidebar/farmdoc.png"
+                alt=""
+                className="w-6"
+              />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm Doc
               </div>
@@ -113,7 +133,11 @@ const Sidebar = ({ loading, setLoading }) => {
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
-              <img src="/images/user/sidebar/chatbot.png" alt="" className="w-6" />
+              <img
+                src="/images/user/sidebar/chatbot.png"
+                alt=""
+                className="w-6"
+              />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Farm AI
               </div>
@@ -127,7 +151,11 @@ const Sidebar = ({ loading, setLoading }) => {
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
-              <img src="/images/user/sidebar/scheme.png" alt="" className="w-6" />
+              <img
+                src="/images/user/sidebar/scheme.png"
+                alt=""
+                className="w-6"
+              />
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Schemes
               </div>
@@ -144,6 +172,9 @@ const Sidebar = ({ loading, setLoading }) => {
                 : "hover:bg-gray-100"
             } rounded-md cursor-pointer group relative`}
           >
+            <span className="w-4 h-4 absolute top-0 right-0 flex justify-center items-center text-[10px] text-white bg-[#1B8841] rounded-full">
+              {cartCount}
+            </span>
             <img src="/images/user/sidebar/cart.png" alt="" className="w-6" />
             <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               Cart
@@ -158,14 +189,10 @@ const Sidebar = ({ loading, setLoading }) => {
                 : "hover:bg-gray-100"
             } rounded-md cursor-pointer group relative`}
           >
-            <span className="w-4 h-4 absolute top-0 right-0 flex justify-center items-center text-xs text-white bg-[#1B8841] rounded-full">
-              3
+            <span className="w-4 h-4 absolute top-0 right-0 flex justify-center items-center text-[10px] text-white bg-[#1B8841] rounded-full">
+              {orderCount}
             </span>
-            <img
-              src="/images/user/sidebar/order.png"
-              alt=""
-              className="w-6"
-            />
+            <img src="/images/user/sidebar/order.png" alt="" className="w-6" />
             <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               Order
             </div>
@@ -179,7 +206,11 @@ const Sidebar = ({ loading, setLoading }) => {
                 : "hover:bg-gray-100"
             } rounded-md cursor-pointer group relative`}
           >
-            <img src="/images/user/sidebar/settings.png" alt="" className="w-6" />
+            <img
+              src="/images/user/sidebar/settings.png"
+              alt=""
+              className="w-6"
+            />
             <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#1B8841] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               Settings
             </div>

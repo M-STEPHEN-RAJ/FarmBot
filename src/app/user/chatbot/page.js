@@ -18,6 +18,9 @@ const ChatBotHome = () => {
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [messages, setMessages] = useState([]);
 
+  const [sending, setSending] = useState(false);
+  const [lastMessage, setLastMessage] = useState("");
+
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const prevLangRef = useRef(lang);
@@ -70,6 +73,12 @@ const ChatBotHome = () => {
     try {
       let chatId = selectedChatId;
 
+      const userMessage = text.trim();
+
+      setLastMessage(userMessage);
+      setText("");
+      setSending(true);
+
       if (!chatId) {
         const { data } = await axios.post(
           `${API}/chatbot/new`,
@@ -84,9 +93,6 @@ const ChatBotHome = () => {
         chatId = data.chatId;
         setSelectedChatId(chatId);
       }
-
-      const userMessage = text.trim();
-      setText("");
 
       await axios.post(
         `${API}/chatbot/send`,
@@ -104,6 +110,8 @@ const ChatBotHome = () => {
     } catch (err) {
       console.error(err);
       toast.error("Failed to send message!");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -199,87 +207,112 @@ const ChatBotHome = () => {
       />
 
       <div className="flex-1 flex justify-center items-center">
-        <div className="flex flex-col justify-center items-center space-y-10 w-full max-w-[800px]">
-          <h2 className="text-4xl font-medium text-[#166831]">
-            Hello, Stephen
-          </h2>
+        {!sending ? (
+          <div className="flex flex-col justify-center items-center space-y-10 w-full max-w-[800px]">
+            <h2 className="text-4xl font-medium text-[#166831]">
+              Hello, Stephen
+            </h2>
 
-          <div
-            className={`w-full flex ${
-              text.length > 59
-                ? "flex-col items-end gap-3"
-                : "flex-row justify-between items-center gap-3"
-            } px-2 py-1 border border-gray-300 rounded-4xl`}
-          >
-            <textarea
-              ref={textareaRef}
-              rows={1}
-              value={text}
-              onChange={handleInput}
-              onKeyDown={handleKeyPress}
-              className="w-full outline-none resize-none overflow-y-auto px-3"
-              placeholder="Ask Farm AI"
-            />
+            <div
+              className={`w-full flex ${
+                text.length > 59
+                  ? "flex-col items-end gap-3"
+                  : "flex-row justify-between items-center gap-3"
+              } px-2 py-1 border border-gray-300 rounded-4xl`}
+            >
+              <textarea
+                ref={textareaRef}
+                rows={1}
+                value={text}
+                onChange={handleInput}
+                onKeyDown={handleKeyPress}
+                className="w-full outline-none resize-none overflow-y-auto px-3"
+                placeholder="Ask Farm AI"
+              />
 
-            <div className="flex items-center gap-3">
-              <div
-                onClick={() => {
-                  if (langLoading) return;
-                  const newLang = lang === "en-US" ? "ta-IN" : "en-US";
-                  setLang(newLang);
-                  updateLanguage(newLang);
-                }}
-                className={`w-10 h-10 flex justify-center items-center p-2.5 rounded-full cursor-pointer 
+              <div className="flex items-center gap-3">
+                <div
+                  onClick={() => {
+                    if (langLoading) return;
+                    const newLang = lang === "en-US" ? "ta-IN" : "en-US";
+                    setLang(newLang);
+                    updateLanguage(newLang);
+                  }}
+                  className={`w-10 h-10 flex justify-center items-center p-2.5 rounded-full cursor-pointer 
     ${langLoading ? "bg-gray-100 animate-pulse hover:bg-gray-300" : "hover:bg-gray-100"}`}
-              >
-                {!langLoading && (
-                  <p className="font-semibold">
-                    {lang === "en-US" ? "en" : "த"}
-                  </p>
-                )}
-              </div>
+                >
+                  {!langLoading && (
+                    <p className="font-semibold">
+                      {lang === "en-US" ? "en" : "த"}
+                    </p>
+                  )}
+                </div>
 
-              <div
-                className={`w-10 p-2 rounded-full cursor-pointer ${
-                  listening ? "bg-red-500" : "bg-[#166831]"
-                } ${langLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={() => {
-                  if (langLoading) return;
-                  text.length > 0 ? handleSend() : startListening();
-                }}
-              >
-                <img
-                  src={`/images/user/chatbot/${
-                    text.length > 0 ? "send" : "microphone"
-                  }.png`}
-                  alt=""
-                  className="w-8"
-                />
+                <div
+                  className={`w-10 p-2 rounded-full cursor-pointer ${
+                    listening ? "bg-red-500" : "bg-[#166831]"
+                  } ${langLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={() => {
+                    if (langLoading) return;
+                    text.length > 0 ? handleSend() : startListening();
+                  }}
+                >
+                  <img
+                    src={`/images/user/chatbot/${
+                      text.length > 0 ? "send" : "microphone"
+                    }.png`}
+                    alt=""
+                    className="w-8"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="w-full max-w-[600px] flex justify-center items-center flex-wrap gap-3">
-            {[
-              "What is the best crop for this season?",
-              "How much fertilizer should I use?",
-              "Detect plant disease",
-              "Expected rainfall for this week",
-              "Tips for healthy soil",
-            ].map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setText(prompt);
-                  textareaRef.current.focus();
-                }}
-                className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm hover:bg-green-200 transition cursor-pointer"
-              >
-                {prompt}
-              </button>
-            ))}
+            <div className="w-full max-w-[600px] flex justify-center items-center flex-wrap gap-3">
+              {[
+                "What is the best crop for this season?",
+                "How much fertilizer should I use?",
+                "Detect plant disease",
+                "Expected rainfall for this week",
+                "Tips for healthy soil",
+              ].map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setText(prompt);
+                    textareaRef.current.focus();
+                  }}
+                  className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm hover:bg-green-200 transition cursor-pointer"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col space-y-10 w-full max-w-[800px]">
+            <div className="flex flex-col gap-4">
+              <div className="max-w-[70%] ml-auto bg-[#166831] text-white text-right px-4 py-2 rounded-lg">
+                {lastMessage}
+              </div>
+
+              {Array.from({ length: 1 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col space-y-5 w-full mx-auto"
+                >
+                  <div className="space-y-2">
+                    <div className="w-[80%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                    <div className="w-[80%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                    <div className="w-[80%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                    <div className="w-[80%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                    <div className="w-[60%] h-7 bg-gray-200 rounded-xl animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

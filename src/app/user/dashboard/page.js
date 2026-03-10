@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [todayAdvice, setTodayAdvice] = useState("");
   const [lang, setLang] = useState("en-IN");
   const [langLoading, setLangLoading] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const [openAddModal, setOpenAddModal] = useState(false);
 
@@ -91,15 +92,15 @@ const Dashboard = () => {
         toast.error("Weather or crop not ready");
         return;
       }
+
+      setAiLoading(true);
+
       const res = await axios.post(
         "/api/dashboard/today",
         {
           cropIndex: selectedCropIndex,
-
           lang,
-
           date: new Date().toISOString(),
-
           crop: {
             name: activeCrop.name,
             startDate: activeCrop.startDate,
@@ -107,7 +108,6 @@ const Dashboard = () => {
             daysRemaining: activeCrop.daysRemaining,
             progress: activeCrop.progress,
           },
-
           weather: {
             temp: weather.main.temp,
             humidity: weather.main.humidity,
@@ -115,7 +115,6 @@ const Dashboard = () => {
             condition: weather.weather[0].description,
             location: `${weather.name}, ${weather.sys.country}`,
           },
-
           disease: activeCrop.health ?? null,
         },
         {
@@ -128,6 +127,8 @@ const Dashboard = () => {
       fetchDashboard();
     } catch (err) {
       toast.error("Failed to generate today task");
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -569,17 +570,23 @@ const Dashboard = () => {
                 </div>
 
                 <div
-                  onClick={generateTodayAdvice}
-                  className="text-white bg-[#166831] px-4 py-1 rounded-md cursor-pointer"
+                  onClick={() => !aiLoading && generateTodayAdvice()}
+                  className={`flex items-center gap-4 w-40 px-3 py-1 rounded-md text-white
+  ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-[#166831] cursor-pointer"}`}
                 >
-                  Ask FarmBot AI
+                  {aiLoading && (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {aiLoading ? "Generating..." : "Ask FarmBot AI"}
                 </div>
               </>
             )}
           </div>
         </div>
-        {loadingDashboard ? (
+        {loadingDashboard || aiLoading ? (
           <div className="space-y-2">
+            <div className="w-full h-4 bg-gray-200 animate-pulse rounded" />
+            <div className="w-full h-4 bg-gray-200 animate-pulse rounded" />
             <div className="w-full h-4 bg-gray-200 animate-pulse rounded" />
             <div className="w-3/4 h-4 bg-gray-200 animate-pulse rounded" />
           </div>
