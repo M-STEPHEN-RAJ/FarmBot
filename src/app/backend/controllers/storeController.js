@@ -1,5 +1,7 @@
 import Product from "../models/Product.js";
 import User from "../models/User.js";
+import Seller from "../models/Seller.js";
+import mongoose from "mongoose";
 
 // Add a new product
 export const createProduct = async (body, seller) => {
@@ -154,4 +156,24 @@ export const getProductById = async (id) => {
   mappedProduct.reviews = reviewsWithUser;
 
   return mappedProduct;
+};
+
+export const editProduct = async (productId, updateData, seller) => {
+  if (!seller || seller.role !== "seller") throw new Error("Unauthorized!");
+
+  if (!mongoose.Types.ObjectId.isValid(productId)) throw new Error("Invalid product ID!");
+
+  const product = await Product.findById(productId);
+  if (!product) throw new Error("Product not found!");
+
+  if (product.sellerId.toString() !== seller._id.toString())
+    throw new Error("Unauthorized! Not your product.");
+
+  // Only update fields that exist in updateData
+  const fieldsToUpdate = ["name", "description", "category", "type", "price", "unit", "stock", "image", "popularity"];
+  fieldsToUpdate.forEach((field) => {
+    if (updateData[field] !== undefined) product[field] = updateData[field];
+  });
+
+  return await product.save();
 };

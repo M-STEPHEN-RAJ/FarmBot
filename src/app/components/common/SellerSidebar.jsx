@@ -157,27 +157,7 @@ const SellerSidebar = ({ loading, setLoading }) => {
             <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#EB3D3F] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               Analysis
             </div>
-          </div>
-
-          <div
-            className={`p-2 ${
-              isActive("/user/notification")
-                ? "bg-red-200 hover:bg-red-300"
-                : "hover:bg-red-100"
-            } rounded-md cursor-pointer group relative`}
-          >
-            <span className="w-4 h-4 absolute top-1 right-1 flex justify-center items-center text-xs text-white bg-[#EB3D3F] rounded-full">
-              3
-            </span>
-            <img
-              src="/images/user/sidebar/notification.png"
-              alt=""
-              className="w-6"
-            />
-            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#EB3D3F] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
-              Notification
-            </div>
-          </div>
+          </div>          
 
           <div
             onClick={() => navigate("/seller/settings/accounts")}

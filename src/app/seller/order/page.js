@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { gsap } from "gsap";
 import { toast } from "react-hot-toast";
+import TrackOrderModal from "@/app/components/seller/order/Modal/TrackOrderModal";
 
 const Order = () => {
   const tabRefs = useRef([]);
@@ -15,6 +16,8 @@ const Order = () => {
   const [search, setSearch] = useState("");
   const [orderStatus, setOrderStatus] = useState("placed");
   const [statusOpen, setStatusOpen] = useState(false);
+
+  const [trackItem, setTrackItem] = useState(null);
 
   const orderFlowOptions = [
     { value: "", label: "All" },
@@ -278,7 +281,10 @@ const Order = () => {
                           </div>
                         </div>
                         <div className="flex flex-col gap-5">
-                          <button className="py-1 px-8 text-white bg-[#EB3D3F] rounded-md cursor-pointer">
+                          <button
+                            onClick={() => setTrackItem(item)}
+                            className="py-1 px-8 text-white bg-[#EB3D3F] rounded-md cursor-pointer"
+                          >
                             Track Package
                           </button>
                           <button className="py-1 px-8 text-[#EB3D3F] border border-[#EB3D3F] rounded-md cursor-pointer">
@@ -294,6 +300,9 @@ const Order = () => {
           )}
         </div>
       </div>
+      {trackItem && (
+        <TrackOrderModal item={trackItem} onClose={() => setTrackItem(null)} />
+      )}
     </div>
   );
 };

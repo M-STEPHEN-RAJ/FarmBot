@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { gsap } from "gsap";
+import Loading from "@/app/components/common/Loading";
 
 const SchemeDetails = () => {
   const router = useRouter();
@@ -93,7 +94,7 @@ const SchemeDetails = () => {
   }, [activeProcess]);
 
   if (loading) {
-    return <div className="p-4">Loading...</div>;
+    return <div className=""><Loading /></div>;
   }
 
   if (!scheme) {
@@ -179,7 +180,7 @@ const SchemeDetails = () => {
         <div className="relative flex border-b border-gray-300 w-fit">
           <span
             ref={indicatorRef}
-            className="absolute bottom-0 h-[2px] bg-[#166831]"
+            className="absolute bottom-0 h-0.5 bg-[#166831]"
             style={{ width: 0 }}
           />
 

@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
 import AddProductModal from "@/app/components/seller/store/Modal/AddProductModal";
+import EditProductModal from "@/app/components/seller/store/Modal/EditProductModal";
 import StoreSidebar from "@/app/components/seller/store/StoreSidebar";
 
 const SellerStore = () => {
@@ -14,7 +15,7 @@ const SellerStore = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [quantities, setQuantities] = useState({});
+  const [editProduct, setEditProduct] = useState(null);
 
   const [filters, setFilters] = useState({
     search: "",
@@ -29,22 +30,22 @@ const SellerStore = () => {
     status: "",
   });
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const query = new URLSearchParams(filters).toString();
-        const { data } = await axios.get(`${API}/seller/products?${query}`, {
-          withCredentials: true,
-        });
-        setProducts(data.length ? data : []);
-      } catch (err) {
-        console.error("Failed to fetch seller products:", err);
-        toast.error("Failed to fetch products!");
-      }
-      setLoading(false);
-    };
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const query = new URLSearchParams(filters).toString();
+      const { data } = await axios.get(`${API}/seller/products?${query}`, {
+        withCredentials: true,
+      });
+      setProducts(data.length ? data : []);
+    } catch (err) {
+      console.error("Failed to fetch seller products:", err);
+      toast.error("Failed to fetch products!");
+    }
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, [filters]);
 
@@ -61,7 +62,7 @@ const SellerStore = () => {
             duration: 0.5,
             stagger: 0.05,
             ease: "power3.out",
-          }
+          },
         );
       }
     });
@@ -69,6 +70,11 @@ const SellerStore = () => {
 
   const addToRefs = (el) => {
     if (el) productsRef.current.push(el);
+  };
+
+  const handleProductUpdated = () => {
+    fetchProducts();
+    setEditProduct(null);
   };
 
   return (
@@ -123,7 +129,7 @@ const SellerStore = () => {
                 <div
                   ref={addToRefs}
                   key={product._id}
-                  onClick={() => router.push(`/user/store/${product._id}`)}
+                  // onClick={() => router.push(`/user/store/${product._id}`)}
                   className="relative w-[180px] h-[220px] border border-gray-300 rounded-xl px-2"
                 >
                   <img
@@ -172,8 +178,8 @@ const SellerStore = () => {
                             product.status == "active"
                               ? "bg-green-700"
                               : product.status == "blocked"
-                              ? "bg-red-600"
-                              : "bg-orange-500"
+                                ? "bg-red-600"
+                                : "bg-orange-500"
                           }`}
                         />
                         <p
@@ -181,8 +187,8 @@ const SellerStore = () => {
                             product.status == "active"
                               ? "text-green-700"
                               : product.status == "blocked"
-                              ? "text-red-600"
-                              : "text-orange-600"
+                                ? "text-red-600"
+                                : "text-orange-600"
                           }`}
                         >
                           {product.status}
@@ -193,6 +199,7 @@ const SellerStore = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        setEditProduct(product);
                       }}
                       className="w-full py-1.5 text-sm text-white bg-[#EB3D3F] rounded-md cursor-pointer mt-1"
                     >
@@ -205,6 +212,13 @@ const SellerStore = () => {
       </div>
 
       {showModal && <AddProductModal onClose={() => setShowModal(false)} />}
+      {editProduct && (
+        <EditProductModal
+          product={editProduct}
+          onClose={() => setEditProduct(null)}
+          onUpdated={handleProductUpdated}
+        />
+      )}
     </div>
   );
 };

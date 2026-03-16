@@ -8,7 +8,7 @@ const Scheme = () => {
   const [schemes, setSchemes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   const debounceRef = useRef(null);
@@ -55,7 +55,19 @@ const Scheme = () => {
           <img src="/images/user/store/search.png" alt="" className="w-5" />
         </div>
         {loading ? (
-          <p>Loading...</p>
+          Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex gap-8 border border-gray-300 px-8 py-4 rounded-md">
+            <div className="w-25 h-25 bg-gray-200 animate-pulse mb-2 rounded-full"></div>
+            <div className="w-full flex flex-col justify-between">
+              <div className="w-100 h-6 bg-gray-200 animate-pulse rounded-md"></div>
+              <div className="space-y-1">
+                <div className="w-full h-4 bg-gray-200 animate-pulse rounded-md"></div>
+                <div className="w-100 h-4 bg-gray-200 animate-pulse rounded-md"></div>
+              </div>
+              <div className="w-40 h-4 bg-gray-200 animate-pulse rounded-md"></div>
+            </div>
+          </div>
+          ))
         ) : (
           schemes.map((scheme) => (
             <div
