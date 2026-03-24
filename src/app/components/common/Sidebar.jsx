@@ -91,9 +91,10 @@ const Sidebar = ({ loading, setLoading }) => {
             </div>
 
             <div
+              onClick={() => navigate("/user/recommender")}
               className={`p-2 ${
-                isActive("/user/crop-recommendation")
-                  ? "bg-gray-300 hover:bg-gray-400"
+                isActive("/user/recommender")
+                  ? "bg-gray-100 hover:bg-gray-200"
                   : "hover:bg-gray-100"
               } rounded-md cursor-pointer group relative`}
             >
