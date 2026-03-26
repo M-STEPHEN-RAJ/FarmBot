@@ -104,61 +104,11 @@ const SellerSidebar = ({ loading, setLoading }) => {
               <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#EB3D3F] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
                 Orders
               </div>
-            </div>
-
-            <div
-              onClick={() => navigate("/seller/earnings")}
-              className={`p-2 ${
-                isActive("/seller/earnings")
-                  ? "bg-red-100 hover:bg-red-200"
-                  : "hover:bg-red-100"
-              } rounded-md cursor-pointer group relative`}
-            >
-              <img
-                src="/images/seller/sidebar/earnings.png"
-                alt=""
-                className="w-6"
-              />
-              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#EB3D3F] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
-                Earnings
-              </div>
-            </div>
-
-            {/* <div
-              onClick={() => navigate("/user/chatbot")}
-              className={`p-2 ${
-                isActive("/user/chatbot")
-                  ? "bg-gray-100 hover:bg-gray-200"
-                  : "hover:bg-gray-100"
-              } rounded-md cursor-pointer group relative`}
-            >
-              <img
-                src="/images/user/sidebar/chatbot.png"
-                alt=""
-                className="w-6"
-              />
-              <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#EB3D3F] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
-                Farm AI
-              </div>
-            </div> */}
+            </div>                       
           </div>
         </div> 
 
-        <div className="space-y-1">
-          <div
-            onClick={() => navigate("/seller/analysis")}
-            className={`p-2 ${
-              isActive("/seller/analysis")
-                ? "bg-red-200 hover:bg-red-300"
-                : "hover:bg-red-100"
-            } rounded-md cursor-pointer group relative`}
-          >
-            <img src="/images/seller/sidebar/analysis.png" alt="" className="w-6" />
-            <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-[#EB3D3F] text-white text-sm px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
-              Analysis
-            </div>
-          </div>          
-
+        <div className="space-y-1">                  
           <div
             onClick={() => navigate("/seller/settings/accounts")}
             className={`p-2 ${

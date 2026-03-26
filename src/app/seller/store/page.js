@@ -129,7 +129,7 @@ const SellerStore = () => {
                 <div
                   ref={addToRefs}
                   key={product._id}
-                  // onClick={() => router.push(`/user/store/${product._id}`)}
+                  onClick={() => router.push(`/seller/store/${product._id}`)}
                   className="relative w-[180px] h-[220px] border border-gray-300 rounded-xl px-2"
                 >
                   <img

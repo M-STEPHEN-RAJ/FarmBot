@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API } from "../../../utils/api.js";
+import DeleteModal from "./Modal/DeleteModal.jsx";
 
 const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
   const [loading, setLoading] = useState(true);
@@ -12,6 +13,8 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [editingChatId, setEditingChatId] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedChatToDelete, setSelectedChatToDelete] = useState(null);
 
   const router = useRouter();
   const dropdownRef = useRef(null);
@@ -36,12 +39,19 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
   };
 
   // Delete Conversation
-  const handleDeleteChat = async (chatId) => {
+  const confirmDelete = async () => {
     try {
+      if (!selectedChatToDelete) return;
+
       await axios.delete(`${API}/chatbot/list`, {
-        params: { chatId },
+        params: { chatId: selectedChatToDelete.id },
       });
+
       toast.success("Chat deleted!");
+
+      setShowDeleteModal(false);
+      setSelectedChatToDelete(null);
+
       router.push("/user/chatbot");
       fetchConversations();
     } catch (err) {
@@ -172,7 +182,7 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
           <p className="text-sm text-gray-500 px-2">Chats</p>
 
           <div className="">
-            {loading &&
+            {loading ? (
               Array.from({ length: 10 }).map((_, index) => (
                 <div
                   key={index}
@@ -181,103 +191,121 @@ const ChatSidebar = ({ selectedChatId, onSelectChat, refreshFlag }) => {
                   <div className="w-50 h-4 bg-gray-200 rounded-sm"></div>
                   <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                 </div>
-              ))}
-
-            {conversations.map((chat, index) => (
-              <div
-                key={chat._id}
-                ref={(el) => (chatRefs.current[index] = el)}
-                onClick={() => {
-                  router.push(`/user/chatbot/${chat._id}`);
-                }}
-                className={`relative px-2 py-2 flex justify-between items-center gap-3 ${
-                  openMenuId === chat._id ? "z-50" : "z-10"
-                } ${
-                  selectedChatId === chat._id
-                    ? "bg-[#eeeef1] hover:bg-gray-200"
-                    : "hover:bg-gray-100"
-                } rounded-md cursor-pointer group`}
-              >
-                {editingChatId === chat._id ? (
-                  <input
-                    ref={renameInputRef}
-                    autoFocus
-                    value={editedTitle}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleRenameChat(chat._id);
-                      }
-                      if (e.key === "Escape") {
-                        setEditingChatId(null);
-                        setEditedTitle("");
-                      }
-                    }}
-                    className="text-sm w-full bg-white border border-gray-300 rounded px-1 outline-none"
-                  />
-                ) : (
-                  <p className="text-sm truncate">{chat.title}</p>
-                )}
-
-                <img
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenMenuId(openMenuId === chat._id ? null : chat._id);
+              ))
+            ) : conversations.length > 0 ? (
+              conversations.map((chat, index) => (
+                <div
+                  key={chat._id}
+                  ref={(el) => (chatRefs.current[index] = el)}
+                  onClick={() => {
+                    router.push(`/user/chatbot/${chat._id}`);
                   }}
-                  src="/images/user/chatbot/more.png"
-                  alt=""
-                  className={`w-4 mr-1.5 opacity-0 ${
-                    openMenuId === chat._id ? "opacity-100" : ""
-                  } group-hover:opacity-100 transition-opacity duration-100`}
-                />
-
-                {openMenuId === chat._id && (
-                  <div
-                    ref={dropdownRef}
-                    onMouseEnter={(e) => e.stopPropagation()}
-                    onMouseLeave={(e) => e.stopPropagation()}
-                    className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
-                  >
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingChatId(chat._id);
-                        setEditedTitle(chat.title);
-                        setOpenMenuId(null);
+                  className={`relative px-2 py-2 flex justify-between items-center gap-3 ${
+                    openMenuId === chat._id ? "z-50" : "z-10"
+                  } ${
+                    selectedChatId === chat._id
+                      ? "bg-[#eeeef1] hover:bg-gray-200"
+                      : "hover:bg-gray-100"
+                  } rounded-md cursor-pointer group`}
+                >
+                  {editingChatId === chat._id ? (
+                    <input
+                      ref={renameInputRef}
+                      autoFocus
+                      value={editedTitle}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleRenameChat(chat._id);
+                        }
+                        if (e.key === "Escape") {
+                          setEditingChatId(null);
+                          setEditedTitle("");
+                        }
                       }}
-                      className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-gray-100 text-gray-600 rounded-b-md cursor-pointer"
-                    >
-                      <img
-                        src="/images/user/chatbot/rename.png"
-                        className="h-4.5 w-4.5"
-                        alt=""
-                      />
-                      Rename
-                    </div>
+                      className="text-sm w-full bg-white border border-gray-300 rounded px-1 outline-none"
+                    />
+                  ) : (
+                    <p className="text-sm truncate">{chat.title}</p>
+                  )}
 
+                  <img
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(openMenuId === chat._id ? null : chat._id);
+                    }}
+                    src="/images/user/chatbot/more.png"
+                    alt=""
+                    className={`w-4 mr-1.5 opacity-0 ${
+                      openMenuId === chat._id ? "opacity-100" : ""
+                    } group-hover:opacity-100 transition-opacity duration-100`}
+                  />
+
+                  {openMenuId === chat._id && (
                     <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteChat(chat._id);
-                        setOpenMenuId(null);
-                      }}
-                      className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-red-50 text-red-600 rounded-t-md cursor-pointer"
+                      ref={dropdownRef}
+                      onMouseEnter={(e) => e.stopPropagation()}
+                      onMouseLeave={(e) => e.stopPropagation()}
+                      className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
                     >
-                      <img
-                        src="/images/user/chatbot/delete.png"
-                        className="h-4.5 w-4.5"
-                        alt=""
-                      />
-                      Delete
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingChatId(chat._id);
+                          setEditedTitle(chat.title);
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-gray-100 text-gray-600 rounded-b-md cursor-pointer"
+                      >
+                        <img
+                          src="/images/user/chatbot/rename.png"
+                          className="h-4.5 w-4.5"
+                          alt=""
+                        />
+                        Rename
+                      </div>
+
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedChatToDelete({
+                            id: chat._id,
+                            title: chat.title,
+                          });
+                          setShowDeleteModal(true);
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-red-50 text-red-600 rounded-t-md cursor-pointer"
+                      >
+                        <img
+                          src="/images/user/chatbot/delete.png"
+                          className="h-4.5 w-4.5"
+                          alt=""
+                        />
+                        Delete
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-400 px-2 py-5">No chats found</p>
+            )}
           </div>
         </div>
       </div>
+
+      {showDeleteModal && (
+        <DeleteModal
+          chatTitle={selectedChatToDelete?.title}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedChatToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+        />
+      )}
     </>
   );
 };

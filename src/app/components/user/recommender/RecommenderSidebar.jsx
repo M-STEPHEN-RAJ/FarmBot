@@ -5,11 +5,14 @@ import { gsap } from "gsap";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
+import DeleteModal from "./Modal/DeleteModal";
 
 const RecommenderSidebar = ({ selectedId, onSelect, refreshFlag }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedItemToDelete, setSelectedItemToDelete] = useState(null);
 
   const dropdownRef = useRef(null);
   const router = useRouter();
@@ -30,14 +33,21 @@ const RecommenderSidebar = ({ selectedId, onSelect, refreshFlag }) => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const confirmDelete = async () => {
     try {
-      await axios.delete(`${API}/recommender/${id}`, {
+      if (!selectedItemToDelete) return;
+
+      await axios.delete(`${API}/recommender/${selectedItemToDelete.id}`, {
         withCredentials: true,
       });
-      fetchItems();
+
       toast.success("Deleted!");
+
+      setShowDeleteModal(false);
+      setSelectedItemToDelete(null);
+
       router.push("/user/recommender");
+      fetchItems();
     } catch (err) {
       console.error("Failed to delete:", err);
       toast.error("Failed to delete!");
@@ -112,86 +122,92 @@ const RecommenderSidebar = ({ selectedId, onSelect, refreshFlag }) => {
         <p className="text-sm text-gray-500 px-2">Recommendations</p>
 
         <div>
-          {loading
-            ? Array.from({ length: 10 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="px-2 py-2 flex justify-between items-center gap-3 rounded-md animate-pulse"
-                >
-                  <div className="w-50 h-4 bg-gray-200 rounded-sm"></div>
-                  <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-                </div>
-              ))
-            : items.map((item, index) => (
-                <div
-                  key={item._id}
-                  ref={(el) => (itemRefs.current[index] = el)}
-                  onClick={() => {
-                    router.push(`/user/recommender/${item._id}`);
+          {loading ? (
+            Array.from({ length: 10 }).map((_, index) => (
+              <div
+                key={index}
+                className="px-2 py-2 flex justify-between items-center gap-3 rounded-md animate-pulse"
+              >
+                <div className="w-50 h-4 bg-gray-200 rounded-sm"></div>
+                <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
+              </div>
+            ))
+          ) : items.length > 0 ? (
+            items.map((item, index) => (
+              <div
+                key={item._id}
+                ref={(el) => (itemRefs.current[index] = el)}
+                onClick={() => {
+                  router.push(`/user/recommender/${item._id}`);
+                }}
+                className={`relative px-2 py-2 flex justify-between items-center gap-3 ${
+                  openMenuId === item._id ? "z-50" : "z-0"
+                } ${
+                  selectedId === item._id
+                    ? "bg-[#eeeef1] hover:bg-gray-200"
+                    : "hover:bg-gray-100"
+                } rounded-md cursor-pointer group`}
+              >
+                <p className="text-sm truncate">{item.crop}</p>
+
+                <img
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuId(openMenuId === item._id ? null : item._id);
                   }}
-                  className={`relative px-2 py-2 flex justify-between items-center gap-3 ${
-                    openMenuId === item._id ? "z-50" : "z-0"
-                  } ${
-                    selectedId === item._id
-                      ? "bg-[#eeeef1] hover:bg-gray-200"
-                      : "hover:bg-gray-100"
-                  } rounded-md cursor-pointer group`}
-                >
-                  <p className="text-sm truncate">{item.crop}</p>
+                  src="/images/user/chatbot/more.png"
+                  alt=""
+                  className={`w-4 mr-1.5 opacity-0 ${
+                    openMenuId === item._id ? "opacity-100" : ""
+                  } group-hover:opacity-100 transition-opacity duration-100`}
+                />
 
-                  <img
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenMenuId(openMenuId === item._id ? null : item._id);
-                    }}
-                    src="/images/user/chatbot/more.png"
-                    alt=""
-                    className={`w-4 mr-1.5 opacity-0 ${
-                      openMenuId === item._id ? "opacity-100" : ""
-                    } group-hover:opacity-100 transition-opacity duration-100`}
-                  />
-
-                  {openMenuId === item._id && (
+                {openMenuId === item._id && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
+                  >                   
                     <div
-                      ref={dropdownRef}
-                      className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedItemToDelete({
+                          id: item._id,
+                          title: item.crop,
+                        });
+                        setShowDeleteModal(true);
+                        setOpenMenuId(null);
+                      }}
+                      className="flex items-center gap-2 w-full text-[13px] px-2 py-1 hover:bg-red-50 text-red-600 cursor-pointer"
                     >
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenMenuId(null);
-                        }}
-                        className="flex items-center gap-2 w-full text-[13px] px-2 py-1 hover:bg-gray-100 text-gray-600 cursor-pointer"
-                      >
-                        <img
-                          src="/images/user/chatbot/rename.png"
-                          className="h-4.5 w-4.5"
-                          alt=""
-                        />
-                        Rename
-                      </div>
-
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(item._id);
-                          setOpenMenuId(null);
-                        }}
-                        className="flex items-center gap-2 w-full text-[13px] px-2 py-1 hover:bg-red-50 text-red-600 cursor-pointer"
-                      >
-                        <img
-                          src="/images/user/chatbot/delete.png"
-                          className="h-4.5 w-4.5"
-                          alt=""
-                        />
-                        Delete
-                      </div>
+                      <img
+                        src="/images/user/chatbot/delete.png"
+                        className="h-4.5 w-4.5"
+                        alt=""
+                      />
+                      Delete
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-400 px-2 py-5">
+              No recommendations found
+            </p>
+          )}
         </div>
       </div>
+
+      {showDeleteModal && (
+        <DeleteModal
+          title={selectedItemToDelete?.title}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedItemToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+        />
+      )}
     </div>
   );
 };

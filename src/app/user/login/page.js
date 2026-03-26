@@ -41,7 +41,7 @@ const Login = () => {
         toast.success("Login successful!");
 
         setLoading(false);
-        router.push("/user/chatbot");
+        router.push("/user/dashboard");
         return;
       }
     } catch (error) {
@@ -59,7 +59,7 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
-    await signIn("google", { callbackUrl: "/user/chatbot" });
+    await signIn("google", { callbackUrl: "/user/dashboard" });
     localStorage.setItem("session-change", Date.now());
   };
 

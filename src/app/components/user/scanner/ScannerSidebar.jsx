@@ -5,11 +5,14 @@ import { gsap } from "gsap";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API } from "@/app/utils/api";
+import DeleteModal from "./Modal/DeleteModal";
 
 const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedScanToDelete, setSelectedScanToDelete] = useState(null);
 
   const dropdownRef = useRef(null);
   const router = useRouter();
@@ -30,17 +33,24 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
     }
   };
 
-  const handleDeleteScan = async (scanId) => {
+  const confirmDelete = async () => {
     try {
-      await axios.delete(`${API}/scanner/${scanId}`, {
+      if (!selectedScanToDelete) return;
+
+      await axios.delete(`${API}/scanner/${selectedScanToDelete.id}`, {
         withCredentials: true,
       });
-      fetchScans();
+
       toast.success("Scan deleted!");
+
+      setShowDeleteModal(false);
+      setSelectedScanToDelete(null);
+
       router.push("/user/scanner");
+      fetchScans();
     } catch (err) {
       console.error("Failed to delete scan:", err);
-      toast.success("Failed to delete scan!");
+      toast.error("Failed to delete scan!");
     }
   };
 
@@ -53,7 +63,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
       gsap.fromTo(
         scanRefs.current,
         { opacity: 0, x: -20 },
-        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" }
+        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" },
       );
     }
   }, [scans]);
@@ -111,7 +121,7 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
         <p className="text-sm text-gray-500 px-2">Scans</p>
 
         <div className="">
-          {loading &&
+          {loading ? (
             Array.from({ length: 10 }).map((_, index) => (
               <div
                 key={index}
@@ -120,76 +130,79 @@ const ScannerSidebar = ({ selectedScanId, onSelectScan, refreshFlag }) => {
                 <div className="w-50 h-4 bg-gray-200 rounded-sm"></div>
                 <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
               </div>
-            ))}
-
-          {scans.map((scan, index) => (
-            <div
-              key={scan._id}
-              ref={(el) => (scanRefs.current[index] = el)}
-              onClick={() => {
-                router.push(`/user/scanner/${scan._id}`);
-              }}
-              className={`relative px-2 py-2 flex justify-between items-center gap-3 ${
-                openMenuId === scan._id ? "z-50" : "z-0"
-              } ${
-                selectedScanId === scan._id
-                  ? "bg-[#eeeef1] hover:bg-gray-200"
-                  : "hover:bg-gray-100"
-              } rounded-md cursor-pointer group`}
-            >
-              <p className="text-sm truncate">{scan.prediction}</p>
-              <img
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenMenuId(openMenuId === scan._id ? null : scan._id);
+            ))
+          ) : scans.length > 0 ? (
+            scans.map((scan, index) => (
+              <div
+                key={scan._id}
+                ref={(el) => (scanRefs.current[index] = el)}
+                onClick={() => {
+                  router.push(`/user/scanner/${scan._id}`);
                 }}
-                src="/images/user/chatbot/more.png"
-                alt=""
-                className={`w-4 mr-1.5 opacity-0 ${
-                  openMenuId === scan._id ? "opacity-100" : ""
-                } group-hover:opacity-100 transition-opacity duration-100`}
-              />
+                className={`relative px-2 py-2 flex justify-between items-center gap-3 ${
+                  openMenuId === scan._id ? "z-50" : "z-0"
+                } ${
+                  selectedScanId === scan._id
+                    ? "bg-[#eeeef1] hover:bg-gray-200"
+                    : "hover:bg-gray-100"
+                } rounded-md cursor-pointer group`}
+              >
+                <p className="text-sm truncate">{scan.prediction}</p>
+                <img
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuId(openMenuId === scan._id ? null : scan._id);
+                  }}
+                  src="/images/user/chatbot/more.png"
+                  alt=""
+                  className={`w-4 mr-1.5 opacity-0 ${
+                    openMenuId === scan._id ? "opacity-100" : ""
+                  } group-hover:opacity-100 transition-opacity duration-100`}
+                />
 
-              {openMenuId === scan._id && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
-                >
+                {openMenuId === scan._id && (
                   <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenMenuId(null)
-                    }}
-                    className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-gray-100 text-gray-600 rounded-b-md cursor-pointer"
-                  >
-                    <img
-                      src="/images/user/chatbot/rename.png"
-                      className="h-4.5 w-4.5"
-                      alt=""
-                    />
-                    Rename
+                    ref={dropdownRef}
+                    className="absolute top-full right-0 mt-1 w-25 bg-white border border-gray-200 rounded-md shadow-sm z-10"
+                  >                    
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedScanToDelete({
+                          id: scan._id,
+                          title: scan.prediction,
+                        });
+                        setShowDeleteModal(true);
+                        setOpenMenuId(null);
+                      }}
+                      className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-red-50 text-red-600 rounded-t-md cursor-pointer"
+                    >
+                      <img
+                        src="/images/user/chatbot/delete.png"
+                        className="h-4.5 w-4.5"
+                        alt=""
+                      />
+                      Delete
+                    </div>
                   </div>
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteScan(scan._id);
-                      setOpenMenuId(null);
-                    }}
-                    className="flex items-center gap-2 w-full text-[13px] text-left px-2 py-1 hover:bg-red-50 text-red-600 rounded-t-md cursor-pointer"
-                  >
-                    <img
-                      src="/images/user/chatbot/delete.png"
-                      className="h-4.5 w-4.5"
-                      alt=""
-                    />
-                    Delete
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-400 px-2 py-5">No scans found</p>
+          )}
         </div>
       </div>
+      {showDeleteModal && (
+        <DeleteModal
+          title={selectedScanToDelete?.title}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedScanToDelete(null);
+          }}
+          onConfirm={confirmDelete}
+        />
+      )}
     </div>
   );
 };
