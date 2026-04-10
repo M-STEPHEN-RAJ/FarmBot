@@ -210,7 +210,7 @@ const ChatBotHome = () => {
         {!sending ? (
           <div className="flex flex-col justify-center items-center space-y-10 w-full max-w-[800px]">
             <h2 className="text-4xl font-medium text-[#166831]">
-              Hello, Stephen
+              Hello, Farmer
             </h2>
 
             <div

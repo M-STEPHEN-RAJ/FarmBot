@@ -46,6 +46,26 @@ const AdminProductDetails = () => {
     }
   };
 
+  const updateStatus = async (status) => {
+    try {
+      await axios.put(
+        `${API}/admin/products/${id}`,
+        { status },
+        { withCredentials: true },
+      );
+
+      toast.success(`Product ${status}!`);
+
+      setProduct((prev) => ({
+        ...prev,
+        status,
+      }));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status!");
+    }
+  };
+
   useEffect(() => {
     if (id) fetchProduct();
   }, [id]);
@@ -76,13 +96,63 @@ const AdminProductDetails = () => {
           <img className="w-5" src="/images/user/store/back.png" alt="" />
         </div>
 
-        <div className="flex items-center gap-3 px-3 py-1 border border-gray-300 rounded-md cursor-pointer">
-            Active
+        <div className="relative" ref={menuRef}>
+          <div
+            onClick={() =>
+              setActiveMenu(activeMenu === "status" ? null : "status")
+            }
+            className="flex items-center gap-3 px-3 py-1 border border-gray-300 rounded-md cursor-pointer"
+          >
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                product.status === "active"
+                  ? "bg-green-600"
+                  : product.status === "blocked"
+                  ? "bg-red-600"
+                  : "bg-orange-500"
+              }`}
+            />
+            <span className="capitalize text-sm">{product.status}</span>
             <img
               src="/images/admin/store/dropdown.png"
               className="w-4 h-4"
               alt=""
             />
+          </div>
+
+          {activeMenu === "status" && (
+            <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-300 rounded-md shadow-md z-50">
+              <button
+                onClick={() => {
+                  updateStatus("active");
+                  setActiveMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-gray-100 cursor-pointer"
+              >
+                Active
+              </button>
+
+              <button
+                onClick={() => {
+                  updateStatus("blocked");
+                  setActiveMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
+              >
+                Blocked
+              </button>
+
+              <button
+                onClick={() => {
+                  updateStatus("review");
+                  setActiveMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-orange-500 hover:bg-gray-100 cursor-pointer"
+              >
+                Review
+              </button>
+            </div>
+          )}
         </div>
 
         {/* <div
@@ -400,7 +470,6 @@ const AdminProductDetails = () => {
           />
         </div>
       )}
-
     </div>
   );
 };

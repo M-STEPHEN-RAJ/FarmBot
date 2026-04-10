@@ -4,35 +4,31 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { API } from "@/app/utils/api";
 import toast from "react-hot-toast";
-import EditNameModal from "@/app/components/user/settings/Modal/EditNameModal";
-import EditAvatarModal from "@/app/components/user/settings/Modal/EditAvatarModal";
-import LogoutModal from "@/app/components/seller/settings/Modal/LogoutModal";
+import LogoutModal from "@/app/components/admin/settings/Modal/LogoutModal";
 
-const SellerSettings = () => {
+const AdminSettings = () => {
   const router = useRouter();
 
-  const [seller, setSeller] = useState(null);
+  const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showEdit, setShowEdit] = useState(false);
-  const [showEditAvatar, setShowEditAvatar] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const fetchProfile = async () => {
     try {
-      const res = await axios.get(`${API}/seller/me`, {
+      const res = await axios.get(`${API}/admin/me`, {
         withCredentials: true,
       });
 
-      if (!res.data?.seller) {
-        router.replace("/seller/login");
+      if (!res.data?.admin) {
+        router.replace("/admin/login");
         return;
       }
 
-      setSeller(res.data.seller);
+      setAdmin(res.data.admin);
     } catch (err) {
       if (err.response?.status === 401) {
-        router.replace("/seller/login");
-        toast.success("User not Found. Please log in!");
+        router.replace("/admin/login");
+        toast.success("Admin not Found. Please log in!");
         return;
       } else {
         toast.error("Something went wrong!");
@@ -45,16 +41,14 @@ const SellerSettings = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${API}/seller/logout`, {}, { withCredentials: true });
+      await axios.post(`${API}/admin/logout`, {}, { withCredentials: true });
 
-      localStorage.removeItem("seller");
+      localStorage.removeItem("admin");
 
+      window.location.href = "/admin/login";
       toast.success("Logged out successfully!");
-
-      router.replace("/seller/login");
     } catch (err) {
       console.error("Logout failed", err);
-      toast.error("Logout failed!");
     }
   };
 
@@ -77,14 +71,13 @@ const SellerSettings = () => {
                 <div className="w-12 h-3 bg-gray-200 rounded-sm mt-1"></div>
               </div>
             </div>
-            <div className="w-20 h-7 bg-gray-200 rounded-md"></div>
           </div>
 
           <div className="w-20 h-8 bg-gray-200 rounded-md"></div>
         </div>
       </>
     );
-  if (!seller) return null;
+  if (!admin) return null;
 
   return (
     <>
@@ -93,48 +86,29 @@ const SellerSettings = () => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div
-              onClick={() => setShowEditAvatar(true)}
-              className="relative cursor-pointer"
-            >
-              <img className="w-18 rounded-full" src={seller.avatar} alt="" />
-              <div className="absolute -bottom-1 -right-1 p-1.5 border border-gray-300 bg-white rounded-full">
+            <div className="relative cursor-pointer">
+              <img className="w-18 rounded-full" src={admin.avatar} alt="" />
+              {/* <div className="absolute -bottom-1 -right-1 p-1.5 border border-gray-300 bg-white rounded-full">
                 <img
                   src="/images/user/settings/camera.png"
                   className="w-4.5"
                   alt=""
                 />
-              </div>
+              </div> */}
             </div>
 
             <div>
-              <p className="">{seller.name}</p>
-              <p className="text-gray-500 text-sm">{seller.email}</p>
+              <p className="">{admin.name}</p>
+              <p className="text-gray-500 text-sm">{admin.email}</p>
               <p className="font-medium text-xs">
-                {new Date(seller.createdAt).toLocaleString("en-US", {
+                {new Date(admin.createdAt).toLocaleString("en-US", {
                   month: "short",
                   year: "numeric",
                 })}
               </p>
             </div>
           </div>
-
-          <div
-            onClick={() => setShowEdit(true)}
-            className="border border-gray-300 py-1 px-3 rounded-md cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <img
-                src="/images/user/settings/edit.png"
-                className="w-5"
-                alt=""
-              />
-              <p className="text-sm">Edit</p>
-            </div>
-          </div>
         </div>
-
-        {/* <h2 className="font-medium">Change Password</h2> */}
 
         <div
           onClick={() => setShowLogoutModal(true)}
@@ -143,28 +117,6 @@ const SellerSettings = () => {
           Logout
         </div>
       </div>
-
-      {showEdit && (
-        <EditNameModal
-          currentName={seller.name}
-          email={seller.email}
-          mode="seller"
-          onClose={() => setShowEdit(false)}
-          onSave={(updatedName) =>
-            setSeller((prev) => ({ ...prev, name: updatedName }))
-          }
-        />
-      )}
-
-      {showEditAvatar && (
-        <EditAvatarModal
-          currentAvatar={seller.avatar}
-          mode="seller"
-          onClose={() => setShowEditAvatar(false)}
-          onSave={(avatar) => setSeller((prev) => ({ ...prev, avatar }))}
-        />
-      )}
-
       {showLogoutModal && (
         <LogoutModal
           onClose={() => setShowLogoutModal(false)}
@@ -178,4 +130,4 @@ const SellerSettings = () => {
   );
 };
 
-export default SellerSettings;
+export default AdminSettings;

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { gsap } from "gsap";
 import { API } from "@/app/utils/api";
@@ -7,10 +8,12 @@ import toast from "react-hot-toast";
 import EditNameModal from "@/app/components/user/settings/Modal/EditNameModal";
 import EditAvatarModal from "@/app/components/user/settings/Modal/EditAvatarModal";
 import EditAddressModal from "@/app/components/user/settings/Modal/EditAddressModal";
+import LogoutModal from "@/app/components/user/settings/Modal/LogoutModal";
 
 const Accounts = () => {
   const dropdownRefs = useRef({});
   const addressRefs = useRef({});
+  const router = useRouter();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,6 +22,7 @@ const Accounts = () => {
   const [editingAddress, setEditingAddress] = useState(null);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [openDropdownIdx, setOpenDropdownIdx] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -131,11 +135,14 @@ const Accounts = () => {
     try {
       await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
 
-      localStorage.clear();
+      localStorage.removeItem("user");
 
-      window.location.href = "/user/login";
+      toast.success("Logged out successfully!");
+
+      router.replace("/user/login");
     } catch (err) {
       console.error("Logout failed", err);
+      toast.error("Logout failed!");
     }
   };
 
@@ -161,45 +168,46 @@ const Accounts = () => {
     };
   }, []);
 
-  if (loading) return (
-    <>
-    <div className="w-full max-w-[850px] h-screen mx-auto space-y-5 overflow-y-auto animate-pulse">
-      <div className="w-42 h-5 bg-gray-200 rounded-md"/>
+  if (loading)
+    return (
+      <>
+        <div className="w-full max-w-[850px] h-screen mx-auto space-y-5 overflow-y-auto animate-pulse">
+          <div className="w-42 h-5 bg-gray-200 rounded-md" />
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <div className="w-18 h-18 bg-gray-200 rounded-full"></div>
-          <div>
-            <div className="w-30 h-4 bg-gray-200 rounded-md"></div>
-            <div className="w-40 h-3.5 bg-gray-200 rounded-md mt-2.5"></div>
-            <div className="w-12 h-3 bg-gray-200 rounded-sm mt-1"></div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="w-18 h-18 bg-gray-200 rounded-full"></div>
+              <div>
+                <div className="w-30 h-4 bg-gray-200 rounded-md"></div>
+                <div className="w-40 h-3.5 bg-gray-200 rounded-md mt-2.5"></div>
+                <div className="w-12 h-3 bg-gray-200 rounded-sm mt-1"></div>
+              </div>
+            </div>
+            <div className="w-20 h-7 bg-gray-200 rounded-md"></div>
           </div>
-        </div>
-        <div className="w-20 h-7 bg-gray-200 rounded-md"></div>
-      </div>
 
-      <div className="w-22 h-5 mt-8 bg-gray-200 rounded-md"/>
+          <div className="w-22 h-5 mt-8 bg-gray-200 rounded-md" />
 
-      <div className="space-y-4">
-        <div className="relative flex justify-between items-center">
-          <div className="mt-1.5 space-y-2">
-            <div className="w-40 h-5 bg-gray-200 rounded-md"></div>
-            <div className="w-60 h-4 bg-gray-200 rounded-sm"></div>
-            <div className="w-50 h-4 bg-gray-200 rounded-sm"></div>
-            <div className="w-25 h-3.5 bg-gray-200 rounded-md"></div>
+          <div className="space-y-4">
+            <div className="relative flex justify-between items-center">
+              <div className="mt-1.5 space-y-2">
+                <div className="w-40 h-5 bg-gray-200 rounded-md"></div>
+                <div className="w-60 h-4 bg-gray-200 rounded-sm"></div>
+                <div className="w-50 h-4 bg-gray-200 rounded-sm"></div>
+                <div className="w-25 h-3.5 bg-gray-200 rounded-md"></div>
+              </div>
+              <div className="absolute top-2 right-0 w-8 h-8 bg-gray-200 rounded-full"></div>
+            </div>
           </div>
-          <div className="absolute top-2 right-0 w-8 h-8 bg-gray-200 rounded-full"></div>
+
+          <div className="w-45 h-8 bg-gray-200 rounded-md mt-10"></div>
+
+          <div className="w-42 h-5 bg-gray-200 rounded-md mt-5" />
+
+          <div className="w-20 h-8 bg-gray-200 rounded-md"></div>
         </div>
-      </div>
-
-      <div className="w-45 h-8 bg-gray-200 rounded-md mt-10"></div>
-
-      <div className="w-42 h-5 bg-gray-200 rounded-md mt-5"/>
-
-      <div className="w-20 h-8 bg-gray-200 rounded-md"></div>
-    </div>
-    </>
-  );
+      </>
+    );
 
   return (
     <>
@@ -362,7 +370,7 @@ const Accounts = () => {
         <h2 className="font-medium">Change Password</h2>
 
         <div
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           className="w-fit text-sm text-red-500 font-medium px-4 py-1 border border-red-500 rounded-sm cursor-pointer"
         >
           Logout
@@ -394,6 +402,16 @@ const Accounts = () => {
             setEditingAddress(null);
           }}
           onSave={handleSaveAddress}
+        />
+      )}
+
+      {showLogoutModal && (
+        <LogoutModal
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={async () => {
+            await handleLogout();
+            setShowLogoutModal(false);            
+          }}
         />
       )}
     </>

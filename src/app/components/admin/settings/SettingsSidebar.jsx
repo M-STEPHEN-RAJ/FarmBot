@@ -22,7 +22,7 @@ const SettingsSidebar = () => {
 
         <div className="space-y-2">
           <div className="space-y-0.5 pr-2">
-            <div className="px-2 py-2 flex items-center gap-3 hover:bg-red-100 rounded-md cursor-pointer">
+            <div className="px-2 py-2 flex items-center gap-3 hover:bg-violet-100 rounded-md cursor-pointer">
               <img
                 src="/images/user/settings/general.png"
                 alt=""
@@ -34,10 +34,10 @@ const SettingsSidebar = () => {
 
           <div className="space-y-0.5 pr-2">
             <div
-              onClick={() => router.push("/seller/settings/accounts")}
-              className={`px-2 py-2 flex items-center gap-3 hover:bg-red-100 ${
+              onClick={() => router.push("/admin/settings/accounts")}
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-violet-100 ${
                 pathname.includes("accounts")
-                  ? "bg-red-200 hover:bg-red-300"
+                  ? "bg-violet-200 hover:bg-violet-300"
                   : ""
               } rounded-md cursor-pointer`}
             >
@@ -52,10 +52,10 @@ const SettingsSidebar = () => {
 
           <div className="space-y-0.5 pr-2">
             <div
-              onClick={() => router.push("/seller/settings/privacy")}
-              className={`px-2 py-2 flex items-center gap-3 hover:bg-red-100 ${
+              onClick={() => router.push("/admin/settings/privacy")}
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-violet-100 ${
                 pathname.includes("privacy")
-                  ? "bg-red-200 hover:bg-red-300"
+                  ? "bg-violet-200 hover:bg-violet-300"
                   : ""
               } rounded-md cursor-pointer`}
             >
@@ -70,10 +70,10 @@ const SettingsSidebar = () => {
 
           <div className="space-y-0.5 pr-2">
             <div 
-              onClick={() => router.push("/seller/settings/support")}
-              className={`px-2 py-2 flex items-center gap-3 hover:bg-red-100 ${
+              onClick={() => router.push("/admin/settings/support")}
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-violet-100 ${
                 pathname.includes("support")
-                  ? "bg-red-200 hover:bg-red-300"
+                  ? "bg-violet-200 hover:bg-violet-300"
                   : ""
               } rounded-md cursor-pointer`}
             >
@@ -88,10 +88,10 @@ const SettingsSidebar = () => {
 
           <div className="space-y-0.5 pr-2">
             <div
-              onClick={() => router.push("/seller/settings/notification")}
-              className={`px-2 py-2 flex items-center gap-3 hover:bg-red-100 ${
+              onClick={() => router.push("/admin/settings/notification")}
+              className={`px-2 py-2 flex items-center gap-3 hover:bg-violet-100 ${
                 pathname.includes("notification")
-                  ? "bg-red-200 hover:bg-red-300"
+                  ? "bg-violet-200 hover:bg-violet-300"
                   : ""
               } rounded-md cursor-pointer`}
             >

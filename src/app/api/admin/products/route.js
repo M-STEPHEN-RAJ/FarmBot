@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/app/backend/config/db.js";
 import Product from "@/app/backend/models/Product.js";
 import jwt from "jsonwebtoken";
+import Seller from "@/app/backend/models/Seller.js";
 import Admin from "@/app/backend/models/Admin.js";
 
 export async function GET(req) {
