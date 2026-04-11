@@ -35,7 +35,7 @@ export const predictScan = async ({ body, userId }) => {
   let predictionResult;
   try {
     const res = await fetch(
-      "http://localhost:5001/predict",
+      "https://plantdiseasedetection-p3cg.onrender.com/predict",
       {
         method: "POST",
         body: formData,

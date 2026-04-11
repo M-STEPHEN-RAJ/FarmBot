@@ -221,10 +221,10 @@ Return ONLY JSON:
 }
 
 Conditions:
-- temperature: 20–35 °C
-- humidity: 40–90 %
-- ph: 5.5–7.5
-- rainfall: 100–300 mm
+- temperature: 26.7 °C
+- humidity: 81.7 %
+- ph: 7.8
+- rainfall: 280.4 mm
 `;
 
       const result = await model.generateContent(prompt);
